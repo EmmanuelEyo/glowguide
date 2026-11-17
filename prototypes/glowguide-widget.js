@@ -69,11 +69,12 @@
   /* ── State ─────────────────────────────────────────────────────────────────── */
 
   const state = {
-    config:    null,
-    isOpen:    false,
-    step:      null,
-    listeners: {},
-    els:       {},
+    config:         null,
+    isOpen:         false,
+    step:           null,
+    listeners:      {},
+    els:            {},
+    processingTimer: null,   // B-02: holds the setInterval handle for the processing step
   };
 
   /* ── Helpers ────────────────────────────────────────────────────────────────── */
@@ -136,6 +137,11 @@
 
   function close() {
     if (!state.els.panel) return;
+    // B-02: cancel any in-flight processing timer when the widget is closed
+    if (state.processingTimer !== null) {
+      clearInterval(state.processingTimer);
+      state.processingTimer = null;
+    }
     state.isOpen = false;
     state.els.panel.classList.remove('open');
     state.els.panel.setAttribute('aria-hidden', 'true');
@@ -155,6 +161,12 @@
   const STEPS = ['welcome', 'consent', 'camera', 'processing', 'report', 'recommendations'];
 
   function goToStep(step) {
+    // B-02: cancel any in-flight processing timer before switching steps
+    if (state.processingTimer !== null) {
+      clearInterval(state.processingTimer);
+      state.processingTimer = null;
+    }
+
     state.step = step;
     const idx = STEPS.indexOf(step);
     const pct = idx <= 0 ? 0 : Math.round((idx / (STEPS.length - 1)) * 100);
@@ -302,12 +314,14 @@
           if (steps[idx]) steps[idx].classList.add('active');
           if (idx >= steps.length - 1) {
             clearInterval(iv);
+            state.processingTimer = null;    // B-02: clear handle once naturally complete
             setTimeout(() => {
               emit('scanComplete', { sessionId: 'demo-123', result: ANALYSIS });
               goToStep('report');
             }, 700);
           }
         }, 650);
+        state.processingTimer = iv;          // B-02: store handle so goToStep/close/destroy can cancel it
         break;
       }
 
@@ -537,11 +551,16 @@
       emit('configUpdated', state.config);
     },
     destroy() {
+      // B-02: cancel any in-flight processing timer on destroy
+      if (state.processingTimer !== null) {
+        clearInterval(state.processingTimer);
+        state.processingTimer = null;
+      }
       if (state.els.panel)    state.els.panel.remove();
       if (state.els.backdrop) state.els.backdrop.remove();
       if (state.els.launcher) state.els.launcher.remove();
       state.config = null; state.isOpen = false; state.step = null;
-      state.els = {}; state.listeners = {};
+      state.els = {}; state.listeners = {}; state.processingTimer = null;
       emit('destroyed', {});
     },
   };
