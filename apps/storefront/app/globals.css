@@ -1,1 +1,165 @@
 @import "tailwindcss";
+
+/* =============================================================================
+   GlowGuide / Luma Beauty — Design Tokens (Tailwind v4 CSS-first config)
+   All tokens live here. Components use Tailwind utilities only.
+   ============================================================================= */
+
+@theme {
+  /* ── Colour palette ──────────────────────────────────────────────────────── */
+
+  /* Backgrounds / surfaces */
+  --color-luma-page:        #F7F0EA;   /* bg-luma-page  — page canvas         */
+  --color-luma-surface:     #FDFAF7;   /* bg-luma-surface — card / panel      */
+  --color-luma-overlay:     #FFFFFF;   /* bg-luma-overlay — modal / tooltip   */
+  --color-luma-subtle:      #F0E9E2;   /* bg-luma-subtle — tinted section     */
+  --color-luma-mist:        #E8E0D8;   /* bg-luma-mist — muted fill           */
+  --color-luma-canvas:      #302B28;   /* bg-luma-canvas — dark surface       */
+
+  /* Typography */
+  --color-luma-ink:         #302B28;   /* text-luma-ink — primary text        */
+  --color-luma-secondary:   #6B5F58;   /* text-luma-secondary                 */
+  --color-luma-muted:       #7A706B;   /* text-luma-muted — muted / disabled  */
+  --color-luma-ghost:       #9C8E86;   /* text-luma-ghost — tertiary          */
+  --color-luma-inverse:     #FDFAF7;   /* text-luma-inverse — on dark surface */
+  --color-luma-disabled:    #BEB5AE;   /* text-luma-disabled                  */
+
+  /* Accent */
+  --color-luma-accent:      #A7685E;   /* bg/text/border-luma-accent          */
+  --color-luma-accent-dark: #8F5248;   /* hover:bg-luma-accent-dark           */
+  --color-luma-blush:       #E8C9C0;   /* bg-luma-blush — secondary accent    */
+  --color-luma-blush-pale:  #F5E6E2;   /* bg-luma-blush-pale — lightest tint  */
+  --color-luma-deco:        #D5C4A5;   /* bg-luma-deco — decorative accent    */
+
+  /* Borders */
+  --color-luma-border:      #E7DED7;   /* border-luma-border                  */
+  --color-luma-border-mid:  #CFC6BC;   /* border-luma-border-mid              */
+  --color-luma-border-strong: #B8ADA4; /* border-luma-border-strong           */
+
+  /* Semantic */
+  --color-luma-gold:        #D4A843;   /* text-luma-gold — star ratings       */
+  --color-luma-success:     #5A7A5A;
+  --color-luma-warning:     #A88B5A;
+  --color-luma-error:       #A05858;
+
+  /* ── Typography ──────────────────────────────────────────────────────────── */
+
+  --font-display: var(--font-cormorant), Georgia, 'Times New Roman', serif;
+  --font-sans:    var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  /* ── Type scale ──────────────────────────────────────────────────────────── */
+
+  --text-2xs:  0.6875rem;   /* 11px */
+  --text-xs:   0.75rem;     /* 12px */
+  --text-sm:   0.875rem;    /* 14px */
+  --text-base: 0.9375rem;   /* 15px */
+  --text-md:   1.0625rem;   /* 17px */
+  --text-lg:   1.1875rem;   /* 19px */
+  --text-xl:   1.375rem;    /* 22px */
+  --text-2xl:  1.75rem;
+  --text-3xl:  2.25rem;
+  --text-4xl:  3rem;
+  --text-5xl:  4rem;
+  --text-6xl:  5.5rem;
+
+  /* ── Leading / tracking ──────────────────────────────────────────────────── */
+
+  --leading-tight:   1.1;
+  --leading-snug:    1.25;
+  --leading-normal:  1.55;
+  --leading-relaxed: 1.75;
+
+  --tracking-tightest: -0.025em;
+  --tracking-tight:    -0.015em;
+  --tracking-normal:    0em;
+  --tracking-wide:      0.06em;
+  --tracking-wider:     0.08em;
+  --tracking-widest:    0.14em;
+
+  /* ── Spacing ─────────────────────────────────────────────────────────────── */
+
+  --spacing: 0.25rem;   /* 1 unit = 0.25rem — Tailwind default scale */
+
+  /* ── Border radius ───────────────────────────────────────────────────────── */
+
+  --radius-xs:   3px;
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-xl:   32px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ─────────────────────────────────────────────────────────────── */
+
+  --shadow-xs:  0 1px 3px rgba(48,43,40,0.06);
+  --shadow-sm:  0 2px 8px rgba(48,43,40,0.08);
+  --shadow-md:  0 4px 16px rgba(48,43,40,0.10);
+  --shadow-lg:  0 8px 32px rgba(48,43,40,0.13);
+  --shadow-xl:  0 16px 48px rgba(48,43,40,0.16);
+  --shadow-2xl: 0 24px 64px rgba(48,43,40,0.20);
+
+  /* ── Layout ──────────────────────────────────────────────────────────────── */
+
+  --width-container:    1280px;
+  --width-narrow:       760px;
+  --height-nav:         68px;
+
+  /* ── Z-index ─────────────────────────────────────────────────────────────── */
+
+  --z-index-nav:      200;
+  --z-index-dropdown: 300;
+  --z-index-overlay:  400;
+  --z-index-widget:   500;
+  --z-index-toast:    600;
+}
+
+/* =============================================================================
+   Base reset
+   ============================================================================= */
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-luma-ink);
+    background-color: var(--color-luma-page);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  img, svg { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+  ul, ol { list-style: none; }
+}
+
+/* =============================================================================
+   Shared layout utilities
+   ============================================================================= */
+
+.container {
+  width: 100%;
+  max-width: var(--width-container);
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .container { padding-inline: 1rem; }
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
