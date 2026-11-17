@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useCart } from '@/contexts/CartContext';
 
 const NAV_LINKS = [
   { href: '/products', label: 'Shop' },
@@ -13,6 +14,7 @@ const NAV_LINKS = [
 export default function Nav() {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen((v) => !v);
+  const { itemCount, openCart } = useCart();
 
   return (
     <header className="sticky top-0 z-[200] bg-[rgba(247,240,234,0.92)] backdrop-blur-md border-b border-luma-border h-[68px]">
@@ -58,7 +60,8 @@ export default function Nav() {
 
           {/* Cart — wired in Feature 2 */}
           <button
-            aria-label="Open cart — 0 items"
+            onClick={openCart}
+            aria-label={itemCount > 0 ? `Open cart — ${itemCount} item${itemCount === 1 ? '' : 's'}` : 'Open cart — empty'}
             className="flex items-center justify-center w-10 h-10 rounded-md text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle transition-colors relative"
           >
             <svg
@@ -78,6 +81,14 @@ export default function Nav() {
               <circle cx="8.5" cy="16.5" r="1.5" fill="currentColor" />
               <circle cx="14.5" cy="16.5" r="1.5" fill="currentColor" />
             </svg>
+            {itemCount > 0 && (
+              <span
+                aria-live="polite"
+                className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-luma-accent text-luma-inverse text-[0.5625rem] font-semibold leading-none px-1"
+              >
+                {itemCount > 99 ? '99+' : itemCount}
+              </span>
+            )}
           </button>
 
           {/* Mobile hamburger */}

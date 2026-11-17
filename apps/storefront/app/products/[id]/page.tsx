@@ -4,8 +4,7 @@ import Link from 'next/link';
 import { PRODUCTS, getProductById, getRelatedProducts } from '@/lib/products';
 import ProductCard from '@/components/ui/ProductCard';
 import ProductTabs from './components/ProductTabs';
-import QuantityStepper from './components/QuantityStepper';
-import { cn } from '@/lib/cn';
+import AddToBagSection from './components/AddToBagSection';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -158,17 +157,7 @@ export default async function ProductDetailPage({ params }: Props) {
             )}
 
             {/* Quantity + Add to Bag */}
-            <div className="flex flex-wrap items-center gap-4 mb-6">
-              <QuantityStepper />
-              <button
-                type="button"
-                disabled
-                aria-label={`Add ${product.name} to bag (available in a future update)`}
-                className="flex-1 min-w-[180px] h-11 bg-luma-accent/60 text-luma-inverse rounded-[4px] text-[0.6875rem] font-semibold tracking-[0.1em] uppercase cursor-not-allowed"
-              >
-                Add to Bag
-              </button>
-            </div>
+            <AddToBagSection productId={product.id} productName={product.name} />
 
             {/* GlowGuide nudge */}
             <div className="rounded-lg bg-luma-blush-pale border border-luma-blush p-4 pl-5 flex items-start gap-3.5">

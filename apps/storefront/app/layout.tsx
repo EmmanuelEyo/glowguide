@@ -3,6 +3,8 @@ import { Cormorant_Garamond, Inter } from 'next/font/google';
 import './globals.css';
 import Nav from '@/components/layout/Nav';
 import Footer from '@/components/layout/Footer';
+import { CartProvider } from '@/contexts/CartContext';
+import CartDrawer from '@/components/cart/CartDrawer';
 
 const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant',
@@ -33,9 +35,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`} suppressHydrationWarning>
       <body>
-        <Nav />
-        <main>{children}</main>
-        <Footer />
+        <CartProvider>
+          <Nav />
+          <CartDrawer />
+          <main>{children}</main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

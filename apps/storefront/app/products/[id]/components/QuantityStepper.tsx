@@ -3,19 +3,39 @@
 import { useState } from 'react';
 import { cn } from '@/lib/cn';
 
-export default function QuantityStepper() {
-  const [qty, setQty] = useState(1);
+interface QuantityStepperProps {
+  value?: number;
+  onChange?: (qty: number) => void;
+  min?: number;
+}
+
+export default function QuantityStepper({ value, onChange, min = 1 }: QuantityStepperProps) {
+  const isControlled = value !== undefined && onChange !== undefined;
+  const [internalQty, setInternalQty] = useState(min);
+  const qty = isControlled ? value : internalQty;
+
+  function decrement() {
+    const next = Math.max(min, qty - 1);
+    if (isControlled) onChange(next);
+    else setInternalQty(next);
+  }
+
+  function increment() {
+    const next = qty + 1;
+    if (isControlled) onChange(next);
+    else setInternalQty(next);
+  }
 
   return (
     <div className="inline-flex items-center border border-luma-border rounded-[4px] overflow-hidden h-11">
       <button
         type="button"
         aria-label="Decrease quantity"
-        onClick={() => setQty((q) => Math.max(1, q - 1))}
-        disabled={qty <= 1}
+        onClick={decrement}
+        disabled={qty <= min}
         className={cn(
           'w-11 h-11 flex items-center justify-center text-xl font-light transition-colors',
-          qty <= 1
+          qty <= min
             ? 'text-luma-disabled cursor-not-allowed'
             : 'text-luma-ink hover:bg-luma-subtle cursor-pointer',
         )}
@@ -32,7 +52,7 @@ export default function QuantityStepper() {
       <button
         type="button"
         aria-label="Increase quantity"
-        onClick={() => setQty((q) => q + 1)}
+        onClick={increment}
         className="w-11 h-11 flex items-center justify-center text-xl font-light text-luma-ink hover:bg-luma-subtle transition-colors cursor-pointer"
       >
         +
@@ -40,3 +60,4 @@ export default function QuantityStepper() {
     </div>
   );
 }
+

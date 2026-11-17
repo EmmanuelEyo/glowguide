@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import type { Product } from '@/types/product';
 import { cn } from '@/lib/cn';
+import { useCart } from '@/contexts/CartContext';
 
 interface ProductCardProps {
   product: Product;
@@ -11,6 +12,13 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, compact = false }: ProductCardProps) {
   const { id, name, description, price, category, tags, gradient, emoji } = product;
+  const { addItem, openCart } = useCart();
+
+  function handleQuickAdd(e: React.MouseEvent) {
+    e.preventDefault();
+    addItem(id, 1);
+    openCart();
+  }
 
   return (
     <article className="h-full">
@@ -77,10 +85,10 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
               ${price}
             </span>
 
-            {/* Add to bag — placeholder, wired in Feature 2 */}
+            {/* Add to bag — wired in Feature 2 */}
             <button
               aria-label={`Add ${name} to bag`}
-              onClick={(e) => e.preventDefault()}
+              onClick={handleQuickAdd}
               className={cn(
                 'inline-flex items-center justify-center rounded-[3px] border border-luma-border-strong text-luma-ink text-[0.625rem] font-medium tracking-[0.08em] uppercase transition-colors hover:bg-luma-accent hover:border-luma-accent hover:text-luma-inverse',
                 compact ? 'h-8 px-3' : 'h-9 px-4',
