@@ -5,6 +5,7 @@ import { PRODUCTS, getProductById, getRelatedProducts } from '@/lib/products';
 import ProductCard from '@/components/ui/ProductCard';
 import ProductTabs from './components/ProductTabs';
 import AddToBagSection from './components/AddToBagSection';
+import { cn } from '@/lib/cn';
 
 interface Props {
   params: Promise<{ id: string }>;

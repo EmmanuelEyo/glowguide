@@ -5,6 +5,7 @@ import Nav from '@/components/layout/Nav';
 import Footer from '@/components/layout/Footer';
 import { CartProvider } from '@/contexts/CartContext';
 import CartDrawer from '@/components/cart/CartDrawer';
+import { GlowGuideWidget } from '@glowguide/widget-ui';
 
 const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant',
@@ -40,6 +41,7 @@ export default function RootLayout({
           <CartDrawer />
           <main>{children}</main>
           <Footer />
+          <GlowGuideWidget config={{ storeId: 'luma-beauty', brandName: 'Luma Beauty' }} />
         </CartProvider>
       </body>
     </html>
