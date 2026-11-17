@@ -1,0 +1,28 @@
+{
+  "name": "glowguide",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm --filter @glowguide/storefront dev",
+    "build:storefront": "pnpm --filter @glowguide/storefront build",
+    "start:storefront": "pnpm --filter @glowguide/storefront start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.21.0",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.21.0",
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.10.1"
+  }
+}
