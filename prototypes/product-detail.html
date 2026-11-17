@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumière Hydrating Serum — Luma Beauty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="glowguide-widget.css">
+<style>
+.serif-part { font-family:var(--font-serif);font-style:italic;letter-spacing:0;font-size:1.25em;text-transform:none }
+
+/* Breadcrumb */
+.breadcrumb { padding:var(--sp-5) 0;border-bottom:1px solid var(--border-color) }
+.breadcrumb-inner { display:flex;gap:var(--sp-3);align-items:center;font-size:var(--text-xs);color:var(--text-tertiary);letter-spacing:var(--tracking-widest);text-transform:uppercase }
+.breadcrumb-inner a:hover { color:var(--text-primary) }
+.breadcrumb-sep { color:var(--border-color-strong) }
+
+/* Product hero */
+.product-hero { display:grid;grid-template-columns:60% 40%;gap:var(--sp-12);padding-block:var(--sp-12) var(--sp-16) }
+
+/* Image side */
+.product-images {}
+.product-main-img {
+  width:100%;aspect-ratio:1;border-radius:var(--radius-md);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;position:relative;
+  background:linear-gradient(145deg,#F5E6D8 0%,#E0C5A8 50%,#C9A880 100%);
+  margin-bottom:var(--sp-4);
+}
+.product-main-emoji { font-size:120px;z-index:1 }
+.product-main-img::before { content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.15);top:10%;left:15% }
+.product-main-img::after { content:'';position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.1);bottom:12%;right:12% }
+.product-thumbs { display:flex;gap:var(--sp-3) }
+.product-thumb {
+  width:72px;height:72px;border-radius:var(--radius-sm);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  border:2px solid transparent;transition:border-color var(--ease-base);
+}
+.product-thumb.active,.product-thumb:hover { border-color:var(--accent) }
+.product-thumb:nth-child(1) { background:linear-gradient(145deg,#F5E6D8,#E0C5A8) }
+.product-thumb:nth-child(2) { background:linear-gradient(165deg,#F5E6D8,#C9A880) }
+.product-thumb:nth-child(3) { background:linear-gradient(125deg,#E0C5A8,#C9A880) }
+
+/* Info side */
+.product-info {}
+.product-meta { display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4) }
+.product-brand-label { font-size:var(--text-xs);letter-spacing:var(--tracking-widest);text-transform:uppercase;color:var(--text-tertiary) }
+.product-title { font-family:var(--font-serif);font-size:clamp(var(--text-2xl),3vw,var(--text-3xl));font-weight:300;line-height:var(--leading-tight);letter-spacing:var(--tracking-tight);margin-bottom:var(--sp-4) }
+.product-rating { display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-5) }
+.stars { color:var(--accent);letter-spacing:2px }
+.rating-text { font-size:var(--text-sm);color:var(--text-secondary) }
+.product-price-row { display:flex;align-items:baseline;gap:var(--sp-3);margin-bottom:var(--sp-5) }
+.product-price-main { font-size:var(--text-2xl);font-weight:500 }
+.product-short-desc { font-size:var(--text-base);color:var(--text-secondary);line-height:var(--leading-relaxed);margin-bottom:var(--sp-5);max-width:380px }
+.product-skin-badges { display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-6) }
+
+/* Quantity */
+.qty-row { display:flex;flex-direction:column;gap:var(--sp-2);margin-bottom:var(--sp-5) }
+.qty-label { font-size:var(--text-xs);font-weight:500;letter-spacing:var(--tracking-widest);text-transform:uppercase;color:var(--text-secondary) }
+.qty-control { display:flex;align-items:center;gap:0;width:fit-content;border:1px solid var(--border-color-mid);border-radius:var(--radius-sm);overflow:hidden }
+.qty-btn { width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;background:var(--surface-raised);color:var(--text-secondary);transition:background var(--ease-base),color var(--ease-base);border:none;font-family:inherit }
+.qty-btn:hover { background:var(--surface-subtle);color:var(--text-primary) }
+.qty-val { width:48px;text-align:center;font-size:var(--text-base);font-weight:500;border-left:1px solid var(--border-color);border-right:1px solid var(--border-color) }
+
+/* Add to bag */
+.add-bag-btn { width:100%;margin-bottom:var(--sp-4) }
+
+/* GlowGuide nudge */
+.gg-nudge {
+  display:flex;align-items:center;gap:var(--sp-3);
+  padding:var(--sp-4);background:rgba(167,104,94,0.07);
+  border-radius:var(--radius-sm);border:1px solid rgba(167,104,94,0.2);
+  margin-bottom:var(--sp-6);cursor:pointer;transition:background var(--ease-base);
+}
+.gg-nudge:hover { background:rgba(167,104,94,0.12) }
+.gg-nudge-icon { font-size:24px;flex-shrink:0 }
+.gg-nudge-text { font-size:var(--text-sm);color:var(--text-secondary);line-height:var(--leading-snug) }
+.gg-nudge-text strong { color:var(--accent) }
+.gg-nudge-arrow { margin-left:auto;color:var(--accent);font-size:1.1rem }
+
+/* Trust strip */
+.trust-strip { display:flex;flex-direction:column;gap:var(--sp-3);padding-top:var(--sp-5);border-top:1px solid var(--border-color) }
+.trust-item { display:flex;align-items:center;gap:var(--sp-3);font-size:var(--text-sm);color:var(--text-secondary) }
+
+/* Tabs */
+.tabs-section { padding-block:var(--sp-16);border-top:1px solid var(--border-color) }
+.tab-nav { display:flex;border-bottom:1px solid var(--border-color);margin-bottom:var(--sp-8);gap:0 }
+.tab-btn {
+  padding:var(--sp-4) var(--sp-6);font-size:var(--text-xs);letter-spacing:var(--tracking-widest);
+  text-transform:uppercase;font-weight:400;color:var(--text-secondary);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all var(--ease-base);
+  background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;
+}
+.tab-btn.active,.tab-btn:hover { color:var(--text-primary) }
+.tab-btn.active { border-bottom-color:var(--accent) }
+.tab-panel { display:none;max-width:600px }
+.tab-panel.active { display:block }
+.tab-panel p { font-size:var(--text-base);color:var(--text-secondary);line-height:var(--leading-relaxed);margin-bottom:var(--sp-4) }
+.tab-panel ul { list-style:disc;padding-left:var(--sp-6) }
+.tab-panel li { font-size:var(--text-base);color:var(--text-secondary);line-height:var(--leading-relaxed);margin-bottom:var(--sp-2) }
+
+/* GlowGuide callout */
+.gg-callout { background:linear-gradient(135deg,#F5EAE7 0%,#EDD8D3 100%);padding-block:var(--sp-16);margin-bottom:0 }
+.gg-callout-inner { display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-12);align-items:center }
+.gg-callout-title { font-family:var(--font-serif);font-size:var(--text-3xl);font-weight:300;line-height:var(--leading-tight);letter-spacing:var(--tracking-tight);margin:var(--sp-3) 0 var(--sp-6) }
+.gg-callout-disclaimer { font-size:var(--text-xs);color:var(--text-tertiary);font-style:italic;margin-top:var(--sp-3) }
+.gg-callout-preview { background:var(--surface-raised);border-radius:20px;box-shadow:var(--shadow-xl);overflow:hidden;border:1px solid var(--border-color);max-width:300px;margin-left:auto }
+.gg-callout-preview-header { padding:14px 18px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between }
+.gg-callout-preview-visual { height:140px;background:linear-gradient(145deg,rgba(167,104,94,0.1),rgba(232,201,192,0.4));display:flex;align-items:center;justify-content:center;font-size:48px }
+.gg-callout-preview-body { padding:16px 18px }
+
+/* You may also like */
+.related-section { padding-block:var(--sp-16) }
+.related-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-6) }
+.related-card { cursor:pointer }
+.related-img { height:200px;display:flex;align-items:center;justify-content:center;font-size:48px;transition:transform var(--ease-base) }
+.related-card:hover .related-img span { transform:scale(1.1) }
+.related-img span { transition:transform var(--ease-base);display:block }
+.related-body { padding:var(--sp-4) }
+.related-name { font-family:var(--font-serif);font-size:1rem;font-weight:400;line-height:var(--leading-snug);margin-bottom:var(--sp-2) }
+.related-price { font-size:var(--text-sm);color:var(--text-secondary) }
+
+@media(max-width:900px) { .product-hero { grid-template-columns:1fr;gap:var(--sp-8) } .gg-callout-inner { grid-template-columns:1fr } .gg-callout-preview { max-width:100%;margin:0 auto } }
+@media(max-width:768px) { .related-grid { grid-template-columns:repeat(2,1fr) } .nav-links { display:none } .mobile-menu-btn { display:inline-flex } }
+@media(max-width:480px) { .related-grid { grid-template-columns:1fr } .product-thumbs { display:none } }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="homepage.html" class="nav-logo"><span class="serif-part">Luma</span> Beauty</a>
+    <ul class="nav-links">
+      <li><a href="catalogue.html" class="nav-link">Products</a></li>
+      <li><a href="#" class="nav-link">Collections</a></li>
+      <li><a href="#" class="nav-link">About</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn-icon" aria-label="Search"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13 13l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      <button class="btn-icon" id="cart-trigger" aria-label="Cart"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 2h1.5l2.1 9h7.4l1.5-6H5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="14.5" r="1" fill="currentColor"/><circle cx="13" cy="14.5" r="1" fill="currentColor"/></svg><span class="cart-count" id="cart-count">0</span></button>
+      <button class="btn-icon mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobile-menu"><a href="catalogue.html">Products</a><a href="#">Collections</a></div>
+</nav>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb"><div class="container breadcrumb-inner"><a href="homepage.html">Home</a><span class="breadcrumb-sep">›</span><a href="catalogue.html">Products</a><span class="breadcrumb-sep">›</span><span>Lumière Hydrating Serum</span></div></div>
+
+<!-- Product hero -->
+<section>
+  <div class="container product-hero">
+    <!-- Image column -->
+    <div class="product-images">
+      <div class="product-main-img" role="img" aria-label="Lumière Hydrating Serum — product image">
+        <span class="product-main-emoji" aria-hidden="true">🫙</span>
+      </div>
+      <div class="product-thumbs" role="list" aria-label="Product views">
+        <div class="product-thumb active" role="listitem" tabindex="0" aria-label="View 1">🫙</div>
+        <div class="product-thumb" role="listitem" tabindex="0" aria-label="View 2">🫙</div>
+        <div class="product-thumb" role="listitem" tabindex="0" aria-label="View 3">🫙</div>
+      </div>
+    </div>
+
+    <!-- Info column -->
+    <div class="product-info">
+      <div class="product-meta">
+        <span class="product-brand-label">Luma Beauty</span>
+        <span class="badge badge-blush">Bestseller</span>
+      </div>
+      <h1 class="product-title">Lumière Hydrating Serum</h1>
+      <div class="product-rating">
+        <span class="stars" aria-label="4.8 out of 5 stars">★★★★★</span>
+        <span class="rating-text">4.8 (142 reviews)</span>
+      </div>
+      <div class="product-price-row">
+        <span class="product-price-main">$68</span>
+      </div>
+      <p class="product-short-desc">A lightweight, deeply hydrating serum that combines multi-weight hyaluronic acid with a targeted peptide complex. Instantly plumps and smooths the appearance of fine lines while supporting long-term moisture retention.</p>
+      <div class="product-skin-badges">
+        <span class="badge badge-blush">All Skin Types</span>
+        <span class="badge badge-champagne">Dehydrated</span>
+        <span class="badge badge-champagne">Mature</span>
+      </div>
+
+      <div class="qty-row">
+        <span class="qty-label">Quantity</span>
+        <div class="qty-control" role="group" aria-label="Quantity">
+          <button class="qty-btn" id="qty-dec" aria-label="Decrease quantity">−</button>
+          <span class="qty-val" id="qty-val" aria-live="polite" aria-atomic="true">1</span>
+          <button class="qty-btn" id="qty-inc" aria-label="Increase quantity">+</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-lg add-bag-btn" id="add-bag-btn" aria-label="Add Lumière Hydrating Serum to cart">Add to Bag</button>
+
+      <div class="gg-nudge" role="button" tabindex="0" data-open-widget aria-label="Open GlowGuide skin analysis">
+        <div class="gg-nudge-icon" aria-hidden="true">✦</div>
+        <div class="gg-nudge-text">Not sure this is right for your skin? <strong>Try GlowGuide</strong> for a personalised product match — guided, private, and illustrative.</div>
+        <div class="gg-nudge-arrow" aria-hidden="true">→</div>
+      </div>
+
+      <div class="trust-strip">
+        <div class="trust-item"><span>🚚</span><span>Free delivery on orders over $75</span></div>
+        <div class="trust-item"><span>↩</span><span>30-day hassle-free returns</span></div>
+        <div class="trust-item"><span>✓</span><span>Clean, dermatologically-considered formulas</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tabs -->
+<section class="tabs-section">
+  <div class="container">
+    <div class="tab-nav" role="tablist">
+      <button class="tab-btn active" data-tab="details" role="tab" aria-selected="true" aria-controls="tab-details">Details</button>
+      <button class="tab-btn" data-tab="ingredients" role="tab" aria-selected="false" aria-controls="tab-ingredients">Ingredients</button>
+      <button class="tab-btn" data-tab="how-to-use" role="tab" aria-selected="false" aria-controls="tab-how-to-use">How to Use</button>
+    </div>
+    <div id="tab-details" class="tab-panel active" role="tabpanel">
+      <p>Formulated for all skin types, the Lumière Hydrating Serum addresses surface dryness, fine lines, and loss of suppleness in a single, lightweight step.</p>
+      <ul>
+        <li>Multi-weight hyaluronic acid — penetrates at multiple skin depths for surface and deeper hydration</li>
+        <li>Tripeptide-5 complex — supports the appearance of firmness and reduces fine lines</li>
+        <li>Panthenol (Pro-Vitamin B5) — soothes, repairs, and locks in moisture</li>
+        <li>Free from parabens, synthetic fragrance, and sulfates</li>
+        <li>Clinically tested for skin tolerance</li>
+      </ul>
+    </div>
+    <div id="tab-ingredients" class="tab-panel" role="tabpanel">
+      <p>Full ingredient list (INCI):</p>
+      <p style="font-family:var(--font-mono);font-size:var(--text-sm);background:var(--surface-subtle);padding:var(--sp-5);border-radius:var(--radius-sm);line-height:2">Aqua, Sodium Hyaluronate (High Molecular Weight), Sodium Hyaluronate (Low Molecular Weight), Hydrolysed Sodium Hyaluronate, Tripeptide-5, Glycerin, Niacinamide, Panthenol, Allantoin, Tocopherol, Citric Acid, Sodium Citrate, Carbomer, Phenoxyethanol, Ethylhexylglycerin.</p>
+    </div>
+    <div id="tab-how-to-use" class="tab-panel" role="tabpanel">
+      <p>Apply 3–4 drops to clean, slightly damp skin morning and evening. Press gently into the skin using your fingertips, working from the centre of your face outward.</p>
+      <p>Follow immediately with your moisturiser to seal in hydration. For best results, use consistently for 4–6 weeks. Suitable for use under SPF and makeup.</p>
+      <p><em>Avoid the immediate eye area. If irritation occurs, discontinue use.</em></p>
+    </div>
+  </div>
+</section>
+
+<!-- GlowGuide callout -->
+<section class="gg-callout">
+  <div class="container gg-callout-inner">
+    <div>
+      <span class="eyebrow">GlowGuide Integration</span>
+      <h2 class="gg-callout-title">Personalised for Your Skin</h2>
+      <p style="color:var(--text-secondary);line-height:var(--leading-relaxed);max-width:380px;margin-bottom:var(--sp-6)">Our guided skin-discovery experience helps you understand your skin profile and find the right products — privately, in your browser.</p>
+      <button class="btn btn-primary btn-lg" data-open-widget>Try GlowGuide</button>
+      <p class="gg-callout-disclaimer">✦ Illustrative demo results — not a medical or clinical assessment</p>
+    </div>
+    <div>
+      <div class="gg-callout-preview" role="img" aria-label="GlowGuide widget preview">
+        <div class="gg-callout-preview-header"><span style="font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent)">✦ GlowGuide</span><span style="font-size:10px;color:var(--text-tertiary)">for Luma Beauty</span></div>
+        <div class="gg-callout-preview-visual">✦</div>
+        <div class="gg-callout-preview-body">
+          <p style="font-family:var(--font-serif);font-size:20px;font-weight:400;line-height:1.2;margin-bottom:8px">Your Skin,<br>Understood.</p>
+          <p style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Guided skin-discovery in three steps.</p>
+          <div style="height:38px;background:var(--accent);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#FDFAF7;font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase">Begin Your Analysis</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- You may also like -->
+<section class="related-section">
+  <div class="container">
+    <div style="margin-bottom:var(--sp-8)"><span class="eyebrow" style="display:block;margin-bottom:var(--sp-3)">Complete Your Routine</span><h2 style="font-family:var(--font-serif);font-size:var(--text-3xl);font-weight:300;letter-spacing:var(--tracking-tight)">You May Also Like</h2></div>
+    <div class="related-grid">
+      <article class="card related-card" onclick="location.href='product-detail.html'">
+        <div class="related-img" style="background:linear-gradient(145deg,#EDE8E3,#D4C9BF,#BEB0A5)"><span aria-hidden="true">🧴</span></div>
+        <div class="related-body"><p class="related-name">Velvet Repair Moisturiser</p><p class="related-price">$85</p></div>
+      </article>
+      <article class="card related-card" onclick="location.href='product-detail.html'">
+        <div class="related-img" style="background:linear-gradient(145deg,#FFF4ED,#FFDCC8,#F5B8A0)"><span aria-hidden="true">✨</span></div>
+        <div class="related-body"><p class="related-name">Radiance Brightening Toner</p><p class="related-price">$42</p></div>
+      </article>
+      <article class="card related-card" onclick="location.href='product-detail.html'">
+        <div class="related-img" style="background:linear-gradient(145deg,#F8F3EE,#EDE3DA,#DCCFC4)"><span aria-hidden="true">👁</span></div>
+        <div class="related-body"><p class="related-name">Nourish Eye Contour Cream</p><p class="related-price">$72</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand"><a href="homepage.html" class="nav-logo"><span class="serif-part">Luma</span> Beauty</a><p>Premium skincare for your unique needs.</p></div>
+    <div class="footer-links">
+      <div class="footer-col"><h4>Shop</h4><a href="catalogue.html">All Products</a><a href="catalogue.html">Serums</a></div>
+      <div class="footer-col"><h4>Help</h4><a href="#">FAQ</a><a href="#">Returns</a></div>
+      <div class="footer-col"><h4>Company</h4><a href="#">About</a><a href="playground.html">Developer</a></div>
+    </div>
+  </div>
+  <div class="footer-bottom"><div class="container"><p>© 2026 Luma Beauty. Fictional demo brand.</p><p>✦ <a href="playground.html">GlowGuide SDK</a></p></div></div>
+</footer>
+
+<!-- Cart drawer -->
+<div class="cart-backdrop" id="cart-backdrop"></div>
+<aside class="cart-drawer" id="cart-drawer" aria-label="Shopping cart" aria-hidden="true">
+  <div class="cart-drawer-header"><h2>Your Cart</h2><button class="btn-icon" id="cart-close" aria-label="Close cart"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M14 4L4 14M4 4l10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
+  <div class="cart-drawer-body" id="cart-body">
+    <div class="cart-empty" id="cart-empty"><div style="font-size:40px">🛍</div><p>Your cart is empty.</p></div>
+  </div>
+  <div class="cart-drawer-footer" id="cart-footer" style="display:none">
+    <div class="cart-total"><span>Total</span><strong id="cart-total">$0</strong></div>
+    <button class="btn btn-primary" style="width:100%">Proceed to Checkout</button>
+    <p style="text-align:center;margin-top:var(--sp-3);font-size:var(--text-xs);color:var(--text-tertiary)">Simulated checkout — demo only</p>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="glowguide-widget.js" defer></script>
+<script>
+// ── Quantity ─────────────────────────────────────────────────────────────────
+let qty = 1;
+document.getElementById('qty-inc').addEventListener('click', function() { if (qty < 10) { qty++; document.getElementById('qty-val').textContent = qty; } });
+document.getElementById('qty-dec').addEventListener('click', function() { if (qty > 1) { qty--; document.getElementById('qty-val').textContent = qty; } });
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    this.setAttribute('aria-selected','true');
+    document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Thumbnails ────────────────────────────────────────────────────────────────
+document.querySelectorAll('.product-thumb').forEach(function(thumb) {
+  thumb.addEventListener('click', function() {
+    document.querySelectorAll('.product-thumb').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ── Cart ─────────────────────────────────────────────────────────────────────
+let cartItems = [], cartTotalVal = 0;
+
+function addToCart(name, price, quantity) {
+  cartItems.push({name, price, quantity});
+  cartTotalVal += price * quantity;
+  document.getElementById('cart-count').textContent = cartItems.reduce(function(a,i){return a+i.quantity},0);
+  document.getElementById('cart-total').textContent = '$' + cartTotalVal;
+  document.getElementById('cart-empty').style.display = 'none';
+  document.getElementById('cart-footer').style.display = 'block';
+
+  const body = document.getElementById('cart-body');
+  const item = document.createElement('div');
+  item.className = 'cart-item';
+  item.innerHTML = '<div class="cart-item-img" style="background:linear-gradient(145deg,#F5E6D8,#E0C5A8);display:flex;align-items:center;justify-content:center;font-size:24px">🫙</div><div class="cart-item-info"><p class="cart-item-name">' + name + '</p><p class="cart-item-price">$' + price + ' × ' + quantity + '</p></div>';
+  body.insertBefore(item, body.firstChild);
+
+  document.getElementById('cart-drawer').classList.add('open');
+  document.getElementById('cart-drawer').setAttribute('aria-hidden','false');
+  document.getElementById('cart-backdrop').classList.add('open');
+  showToast(name + ' added to your cart');
+}
+
+document.getElementById('add-bag-btn').addEventListener('click', function() {
+  addToCart('Lumière Hydrating Serum', 68, qty);
+});
+
+document.getElementById('cart-trigger').addEventListener('click', function() {
+  document.getElementById('cart-drawer').classList.toggle('open');
+  document.getElementById('cart-backdrop').classList.toggle('open');
+});
+document.getElementById('cart-close').addEventListener('click', closeCart);
+document.getElementById('cart-backdrop').addEventListener('click', closeCart);
+function closeCart() { document.getElementById('cart-drawer').classList.remove('open'); document.getElementById('cart-backdrop').classList.remove('open'); }
+
+// ── Mobile menu ───────────────────────────────────────────────────────────────
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+  this.setAttribute('aria-expanded', document.getElementById('mobile-menu').classList.contains('open'));
+});
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 2800); }
+
+// ── GlowGuide ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.GlowGuide) {
+    GlowGuide.init({ storeId:'luma-beauty', brandName:'Luma Beauty', primaryColor:'#A7685E', mode:'floating' });
+    GlowGuide.on('addToCart', function(e) { addToCart(e.payload.productName, e.payload.price, 1); });
+  }
+  document.querySelectorAll('[data-open-widget]').forEach(function(el) {
+    el.addEventListener('click', function() { if (window.GlowGuide) GlowGuide.open(); });
+    el.addEventListener('keydown', function(e) { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); if (window.GlowGuide) GlowGuide.open(); } });
+  });
+});
+</script>
+</body>
+</html>
