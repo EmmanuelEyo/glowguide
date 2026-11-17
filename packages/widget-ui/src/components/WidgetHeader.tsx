@@ -3,6 +3,7 @@
 interface WidgetHeaderProps {
   brandName?: string;
   stepTitle?: string;
+  stepBadge?: string;
   showClose?: boolean;
   onClose?: () => void;
 }
@@ -10,6 +11,7 @@ interface WidgetHeaderProps {
 export function WidgetHeader({
   brandName = 'GlowGuide',
   stepTitle = 'Skin Discovery',
+  stepBadge,
   showClose = false,
   onClose,
 }: WidgetHeaderProps) {
@@ -20,9 +22,16 @@ export function WidgetHeader({
           ✦
         </div>
         <div>
-          <p className="text-[0.625rem] font-medium tracking-[0.14em] uppercase text-luma-ghost">
-            {brandName}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-[0.625rem] font-medium tracking-[0.14em] uppercase text-luma-ghost">
+              {brandName}
+            </p>
+            {stepBadge && (
+              <span className="text-[0.625rem] font-medium tracking-[0.06em] text-luma-accent">
+                • {stepBadge}
+              </span>
+            )}
+          </div>
           <h2 className="font-display text-base font-light text-luma-ink leading-tight">
             {stepTitle}
           </h2>

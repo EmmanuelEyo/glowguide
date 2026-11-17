@@ -2,6 +2,8 @@ export type WidgetMode = 'floating' | 'inline';
 export type WidgetTheme = 'light' | 'dark' | string;
 export type LauncherPosition = 'bottom-right' | 'bottom-left' | string;
 
+export type SessionStepId = 'welcome' | 'consent' | 'capture';
+
 export interface WidgetConfig {
   storeId: string;
   mode?: WidgetMode;
@@ -13,19 +15,36 @@ export interface WidgetConfig {
 }
 
 export interface WidgetStep {
-  id: string;
+  id: SessionStepId;
   title: string;
   stepNumber: number;
   totalSteps: number;
 }
 
+export interface SessionState {
+  sessionId: string;
+  step: SessionStepId;
+  consentGiven: boolean;
+  consentTimestamp: string | null;
+}
+
+export interface ConsentGivenEvent {
+  timestamp: string;
+  sessionId: string;
+}
+
 export interface WidgetContextValue {
   isOpen: boolean;
   mode: WidgetMode;
-  currentStep: string;
+  session: SessionState;
+  currentStep: SessionStepId;
   config: WidgetConfig;
   openWidget: () => void;
   closeWidget: () => void;
   toggleWidget: () => void;
-  setStep: (step: string) => void;
+  setStep: (step: SessionStepId) => void;
+  nextStep: () => void;
+  prevStep: () => void;
+  resetSession: () => void;
+  setConsent: (consentGiven: boolean) => void;
 }

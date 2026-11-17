@@ -1,10 +1,22 @@
 'use client';
 
+import { useWidget } from '../../context/WidgetContext';
+
 interface WelcomeStepProps {
-  onStart: () => void;
+  onStart?: () => void;
 }
 
 export function WelcomeStep({ onStart }: WelcomeStepProps) {
+  const { nextStep } = useWidget();
+
+  function handleStart() {
+    if (onStart) {
+      onStart();
+    } else {
+      nextStep();
+    }
+  }
+
   return (
     <div className="flex flex-col items-center text-center p-6 sm:p-8">
       {/* Decorative emblem */}
@@ -67,7 +79,7 @@ export function WelcomeStep({ onStart }: WelcomeStepProps) {
       {/* Action button */}
       <button
         type="button"
-        onClick={onStart}
+        onClick={handleStart}
         className="w-full h-12 rounded-[3px] bg-luma-accent hover:bg-luma-accent-dark text-luma-inverse text-[0.6875rem] font-medium tracking-[0.14em] uppercase transition-colors shadow-sm"
       >
         Begin Skin Analysis

@@ -3,7 +3,7 @@
 import { WidgetProvider, useWidget } from '../context/WidgetContext';
 import { FloatingWidget } from './FloatingWidget';
 import { InlineWidget } from './InlineWidget';
-import type { WidgetConfig, WidgetMode } from '../types/widget';
+import type { ConsentGivenEvent, WidgetConfig, WidgetMode } from '../types/widget';
 
 interface GlowGuideWidgetInnerProps {
   modeOverride?: WidgetMode;
@@ -25,17 +25,26 @@ export interface GlowGuideWidgetProps {
   config?: Partial<WidgetConfig>;
   mode?: WidgetMode;
   className?: string;
+  onConsentGiven?: (event: ConsentGivenEvent) => void;
+  children?: React.ReactNode;
 }
 
-export function GlowGuideWidget({ config, mode, className }: GlowGuideWidgetProps) {
+export function GlowGuideWidget({
+  config,
+  mode,
+  className,
+  onConsentGiven,
+  children,
+}: GlowGuideWidgetProps) {
   const mergedConfig: Partial<WidgetConfig> = {
     ...config,
     ...(mode ? { mode } : {}),
   };
 
   return (
-    <WidgetProvider config={mergedConfig}>
+    <WidgetProvider config={mergedConfig} onConsentGiven={onConsentGiven}>
       <GlowGuideWidgetInner modeOverride={mode} className={className} />
+      {children}
     </WidgetProvider>
   );
 }
