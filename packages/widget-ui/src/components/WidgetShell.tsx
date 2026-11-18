@@ -4,7 +4,7 @@ import { WidgetHeader } from './WidgetHeader';
 import { WidgetProgress } from './WidgetProgress';
 import { WelcomeStep } from './steps/WelcomeStep';
 import { ConsentStep } from './steps/ConsentStep';
-import { CaptureStepPlaceholder } from './steps/CaptureStepPlaceholder';
+import { CameraCaptureStep } from './steps/CameraCaptureStep';
 import { useWidget } from '../context/WidgetContext';
 import type { SessionStepId } from '../types/widget';
 
@@ -60,7 +60,7 @@ export function WidgetShell({
       <div className="flex-1 overflow-y-auto">
         {currentStep === 'welcome' && <WelcomeStep />}
         {currentStep === 'consent' && <ConsentStep />}
-        {currentStep === 'capture' && <CaptureStepPlaceholder />}
+        {currentStep === 'capture' && <CameraCaptureStep />}
       </div>
     </div>
   );

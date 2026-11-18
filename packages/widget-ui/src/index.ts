@@ -1,5 +1,6 @@
 export * from './types/widget';
 export * from './context/WidgetContext';
+export * from './hooks/useCamera';
 export * from './components/WidgetHeader';
 export * from './components/WidgetProgress';
 export * from './components/WidgetFooter';
@@ -8,3 +9,5 @@ export * from './components/FloatingWidget';
 export * from './components/InlineWidget';
 export * from './components/GlowGuideWidget';
 export * from './components/steps/WelcomeStep';
+export * from './components/steps/ConsentStep';
+export * from './components/steps/CameraCaptureStep';

@@ -75,11 +75,10 @@ function SessionInspector() {
                   key={s.id}
                   type="button"
                   onClick={() => setStep(s.id)}
-                  className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg text-xs font-medium border transition-colors ${
-                    isActive
+                  className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg text-xs font-medium border transition-colors ${isActive
                       ? 'bg-luma-accent text-luma-inverse border-luma-accent shadow-sm'
                       : 'bg-luma-subtle text-luma-secondary border-luma-border hover:bg-luma-card'
-                  }`}
+                    }`}
                 >
                   <span className="text-[0.625rem] opacity-80 uppercase tracking-wider">
                     Step {s.number}
@@ -91,7 +90,7 @@ function SessionInspector() {
           </div>
         </div>
 
-        {/* Consent Status */}
+        {/* Consent & Camera Status */}
         <div className="grid grid-cols-2 gap-3 pt-2">
           <div className="bg-luma-subtle p-3 rounded-xl border border-luma-border">
             <span className="block text-[0.6875rem] uppercase tracking-wider text-luma-ghost mb-1">
@@ -99,9 +98,8 @@ function SessionInspector() {
             </span>
             <div className="flex items-center gap-2">
               <span
-                className={`w-2 h-2 rounded-full ${
-                  session.consentGiven ? 'bg-emerald-500' : 'bg-amber-500'
-                }`}
+                className={`w-2 h-2 rounded-full ${session.consentGiven ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}
               />
               <span className="text-xs font-semibold text-luma-ink">
                 {session.consentGiven ? 'Agreed' : 'Pending'}
@@ -111,14 +109,56 @@ function SessionInspector() {
 
           <div className="bg-luma-subtle p-3 rounded-xl border border-luma-border">
             <span className="block text-[0.6875rem] uppercase tracking-wider text-luma-ghost mb-1">
-              Consent Timestamp
+              Camera State
             </span>
-            <span className="text-xs font-mono text-luma-ink truncate block">
-              {session.consentTimestamp
-                ? new Date(session.consentTimestamp).toLocaleTimeString()
-                : 'None'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`w-2 h-2 rounded-full ${session.cameraState === 'active'
+                    ? 'bg-emerald-500'
+                    : session.cameraState === 'error' || session.cameraState === 'denied'
+                      ? 'bg-red-500'
+                      : 'bg-zinc-400'
+                  }`}
+              />
+              <span className="text-xs font-semibold text-luma-ink capitalize">
+                {session.cameraState}
+              </span>
+            </div>
           </div>
+        </div>
+
+        {/* Captured Image Inspector */}
+        <div className="bg-luma-subtle p-3 rounded-xl border border-luma-border">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[0.6875rem] uppercase tracking-wider text-luma-ghost">
+              Captured Image
+            </span>
+            {session.capturedImageUrl && (
+              <span className="text-[0.625rem] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-mono">
+                Blob Loaded
+              </span>
+            )}
+          </div>
+          {session.capturedImageUrl ? (
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-luma-canvas border border-luma-border overflow-hidden shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={session.capturedImageUrl}
+                  alt="Thumbnail"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-luma-ink truncate">In-Memory Object URL</p>
+                <p className="text-[0.625rem] font-mono text-luma-ghost truncate">
+                  {session.capturedImageUrl}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-luma-ghost italic">No image captured yet</p>
+          )}
         </div>
 
         {/* In-Memory Guarantee */}

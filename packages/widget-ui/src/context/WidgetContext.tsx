@@ -9,6 +9,7 @@ import {
   useState,
 } from 'react';
 import type {
+  CameraState,
   ConsentGivenEvent,
   SessionState,
   SessionStepId,
@@ -64,6 +65,8 @@ export function WidgetProvider({
   const [currentStep, setCurrentStep] = useState<SessionStepId>('welcome');
   const [consentGiven, setConsentGiven] = useState(false);
   const [consentTimestamp, setConsentTimestamp] = useState<string | null>(null);
+  const [cameraState, setCameraStateState] = useState<CameraState>('idle');
+  const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
 
   const mode: WidgetMode = mergedConfig.mode ?? 'floating';
 
@@ -107,12 +110,50 @@ export function WidgetProvider({
     [sessionId, onConsentGiven],
   );
 
+  const setCameraState = useCallback((state: CameraState) => {
+    setCameraStateState(state);
+  }, []);
+
+  const setCapturedImage = useCallback((url: string) => {
+    setCapturedImageUrl((prev) => {
+      if (prev && prev !== url && prev.startsWith('blob:')) {
+        URL.revokeObjectURL(prev);
+      }
+      return url;
+    });
+  }, []);
+
+  const clearCapturedImage = useCallback(() => {
+    setCapturedImageUrl((prev) => {
+      if (prev && prev.startsWith('blob:')) {
+        URL.revokeObjectURL(prev);
+      }
+      return null;
+    });
+  }, []);
+
   const resetSession = useCallback(() => {
+    setCapturedImageUrl((prev) => {
+      if (prev && prev.startsWith('blob:')) {
+        URL.revokeObjectURL(prev);
+      }
+      return null;
+    });
+    setCameraStateState('idle');
     setSessionId(generateSessionId());
     setCurrentStep('welcome');
     setConsentGiven(false);
     setConsentTimestamp(null);
   }, []);
+
+  // Cleanup object URL on unmount of provider
+  useEffect(() => {
+    return () => {
+      if (capturedImageUrl && capturedImageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(capturedImageUrl);
+      }
+    };
+  }, [capturedImageUrl]);
 
   // Document-level listener for elements with [data-open-widget] attribute
   useEffect(() => {
@@ -137,8 +178,10 @@ export function WidgetProvider({
       step: currentStep,
       consentGiven,
       consentTimestamp,
+      cameraState,
+      capturedImageUrl,
     }),
-    [sessionId, currentStep, consentGiven, consentTimestamp],
+    [sessionId, currentStep, consentGiven, consentTimestamp, cameraState, capturedImageUrl],
   );
 
   const value = useMemo<WidgetContextValue>(
@@ -156,6 +199,9 @@ export function WidgetProvider({
       prevStep,
       resetSession,
       setConsent,
+      setCameraState,
+      setCapturedImage,
+      clearCapturedImage,
     }),
     [
       isOpen,
@@ -171,6 +217,9 @@ export function WidgetProvider({
       prevStep,
       resetSession,
       setConsent,
+      setCameraState,
+      setCapturedImage,
+      clearCapturedImage,
     ],
   );
 

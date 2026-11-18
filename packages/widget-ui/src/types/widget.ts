@@ -3,6 +3,7 @@ export type WidgetTheme = 'light' | 'dark' | string;
 export type LauncherPosition = 'bottom-right' | 'bottom-left' | string;
 
 export type SessionStepId = 'welcome' | 'consent' | 'capture';
+export type CameraState = 'idle' | 'active' | 'error' | 'denied';
 
 export interface WidgetConfig {
   storeId: string;
@@ -26,6 +27,8 @@ export interface SessionState {
   step: SessionStepId;
   consentGiven: boolean;
   consentTimestamp: string | null;
+  cameraState: CameraState;
+  capturedImageUrl: string | null;
 }
 
 export interface ConsentGivenEvent {
@@ -47,4 +50,7 @@ export interface WidgetContextValue {
   prevStep: () => void;
   resetSession: () => void;
   setConsent: (consentGiven: boolean) => void;
+  setCameraState: (cameraState: CameraState) => void;
+  setCapturedImage: (imageUrl: string) => void;
+  clearCapturedImage: () => void;
 }
