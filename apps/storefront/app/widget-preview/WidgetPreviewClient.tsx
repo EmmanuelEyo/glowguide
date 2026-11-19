@@ -42,7 +42,8 @@ function SessionInspector() {
     { id: 'welcome', label: 'Welcome', number: 1 },
     { id: 'consent', label: 'Consent', number: 2 },
     { id: 'capture', label: 'Capture', number: 3 },
-    { id: 'analyzing', label: 'Analysis', number: 4 },
+    { id: 'analyzing', label: 'Scanning', number: 3 },
+    { id: 'report', label: 'Report', number: 4 },
   ];
 
   const handleSimulateCameraError = (
@@ -105,7 +106,7 @@ function SessionInspector() {
         {/* Current Step */}
         <div>
           <span className="block text-xs text-luma-secondary mb-2">Current Step</span>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-5 gap-1">
             {steps.map((s) => {
               const isActive = currentStep === s.id;
               return (
@@ -113,16 +114,16 @@ function SessionInspector() {
                   key={s.id}
                   type="button"
                   onClick={() => setStep(s.id)}
-                  className={`flex flex-col items-center justify-center py-2 px-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                  className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg text-xs font-medium border transition-colors ${
                     isActive
                       ? 'bg-luma-accent text-luma-inverse border-luma-accent shadow-sm'
                       : 'bg-luma-subtle text-luma-secondary border-luma-border hover:bg-luma-card'
                   }`}
                 >
                   <span className="text-[0.5625rem] opacity-80 uppercase tracking-wider">
-                    Step {s.number}
+                    {s.number ? `Step ${s.number}` : 'Extra'}
                   </span>
-                  <span className="font-semibold text-[0.6875rem] mt-0.5 truncate w-full text-center">
+                  <span className="font-semibold text-[0.625rem] mt-0.5 truncate w-full text-center">
                     {s.label}
                   </span>
                 </button>
@@ -243,24 +244,53 @@ function SessionInspector() {
               </button>
             )}
           </div>
+
+          {/* Instant Scenario Quick Previews */}
+          <div className="mt-3 pt-2.5 border-t border-luma-border">
+            <span className="block text-[0.5625rem] uppercase tracking-wider text-luma-ghost mb-1.5">
+              Instant Profile Previews (Feature 8):
+            </span>
+            <div className="grid grid-cols-2 gap-1.5">
+              {SCENARIO_KEYS.map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => {
+                    setSelectedScenario(k);
+                    startAnalysis(k);
+                  }}
+                  className="text-[0.625rem] px-2 py-1.5 rounded border border-luma-border bg-luma-surface hover:bg-luma-card text-luma-ink font-medium truncate text-left transition-colors"
+                >
+                  ✦ {MOCK_SCENARIOS[k]?.name || k}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Analysis Result Summary if done */}
         {session.analysisResult && (
           <div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/70">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[0.6875rem] uppercase tracking-wider text-emerald-800 font-semibold">
-                Result: {session.analysisResult.scenarioId}
+              <span className="text-[0.6875rem] uppercase tracking-wider text-emerald-800 font-semibold truncate">
+                {session.analysisResult.scenarioName || session.analysisResult.scenarioId}
               </span>
               <span className="text-[0.625rem] text-emerald-700 font-mono">
                 {session.analysisResult.observations.length} Metrics
               </span>
             </div>
+            {session.analysisResult.primaryFocus && (
+              <p className="text-[0.625rem] text-emerald-900 font-medium mb-1.5">
+                Focus: {session.analysisResult.primaryFocus}
+              </p>
+            )}
             <div className="space-y-1">
               {session.analysisResult.observations.map((obs) => (
-                <div key={obs.label} className="text-[0.6875rem] flex items-center justify-between">
+                <div key={obs.label} className="text-[0.625rem] flex items-center justify-between">
                   <span className="text-emerald-950 font-medium">{obs.label}:</span>
-                  <span className="text-emerald-800">{obs.value}</span>
+                  <span className="text-emerald-800">
+                    {obs.value} ({obs.score}%)
+                  </span>
                 </div>
               ))}
             </div>

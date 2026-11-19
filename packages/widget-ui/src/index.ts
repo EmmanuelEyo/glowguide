@@ -12,5 +12,6 @@ export * from './components/steps/WelcomeStep';
 export * from './components/steps/ConsentStep';
 export * from './components/steps/CameraCaptureStep';
 export * from './components/steps/AnalyzingStep';
+export * from './components/steps/SkinReportStep';
 export * from './components/camera/CameraErrorRecovery';
 export * from './services/skinAnalysis';

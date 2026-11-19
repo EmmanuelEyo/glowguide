@@ -236,6 +236,7 @@ export function WidgetProvider({
 
         setAnalysisResult(result);
         setProcessingStatus('done');
+        setCurrentStep('report');
         onScanComplete?.({ sessionId, result });
         return result;
       } catch (err: unknown) {

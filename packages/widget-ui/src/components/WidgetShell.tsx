@@ -6,6 +6,7 @@ import { WelcomeStep } from './steps/WelcomeStep';
 import { ConsentStep } from './steps/ConsentStep';
 import { CameraCaptureStep } from './steps/CameraCaptureStep';
 import { AnalyzingStep } from './steps/AnalyzingStep';
+import { SkinReportStep } from './steps/SkinReportStep';
 import { useWidget } from '../context/WidgetContext';
 import type { SessionStepId } from '../types/widget';
 
@@ -21,28 +22,28 @@ const STEP_METADATA: Record<
 > = {
   welcome: {
     title: 'Skin Discovery',
-    badge: 'Step 1 of 3',
+    badge: 'Step 1 of 4',
     index: 0,
   },
   consent: {
     title: 'Camera Consent',
-    badge: 'Step 2 of 3',
+    badge: 'Step 2 of 4',
     index: 1,
   },
   capture: {
     title: 'Skin Capture',
-    badge: 'Step 3 of 3',
+    badge: 'Step 3 of 4',
     index: 2,
   },
   analyzing: {
     title: 'Skin Analysis',
-    badge: 'Evaluating',
+    badge: 'Evaluating...',
     index: 2,
   },
   report: {
-    title: 'Skin Report',
-    badge: 'Results',
-    index: 2,
+    title: 'Skin Profile',
+    badge: 'Step 4 of 4',
+    index: 3,
   },
 };
 
@@ -66,13 +67,14 @@ export function WidgetShell({
         onClose={onClose}
       />
 
-      <WidgetProgress currentStepIndex={currentMeta.index} totalSteps={3} />
+      <WidgetProgress currentStepIndex={currentMeta.index} totalSteps={4} />
 
       <div className="flex-1 overflow-y-auto">
         {currentStep === 'welcome' && <WelcomeStep />}
         {currentStep === 'consent' && <ConsentStep />}
         {currentStep === 'capture' && <CameraCaptureStep />}
-        {(currentStep === 'analyzing' || currentStep === 'report') && <AnalyzingStep />}
+        {currentStep === 'analyzing' && <AnalyzingStep />}
+        {currentStep === 'report' && <SkinReportStep />}
       </div>
     </div>
   );

@@ -23,14 +23,25 @@ export interface CameraErrorEvent {
   message: string;
 }
 
+export type ObservationLevel =
+  | 'optimal'
+  | 'good'
+  | 'moderate'
+  | 'needs-attention';
+
 export interface Observation {
   label: string;
   value: string;
   note: string;
+  score?: number;
+  level?: ObservationLevel;
 }
 
 export interface AnalysisResult {
   scenarioId: string;
+  scenarioName?: string;
+  summary?: string;
+  primaryFocus?: string;
   observations: Observation[];
   generatedAt: string;
 }

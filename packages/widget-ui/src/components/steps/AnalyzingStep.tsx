@@ -19,6 +19,13 @@ export function AnalyzingStep() {
     return () => clearInterval(interval);
   }, [session.processingStatus]);
 
+  // If analysis already completed, forward immediately to report step
+  useEffect(() => {
+    if (session.processingStatus === 'done' && session.analysisResult) {
+      setStep('report');
+    }
+  }, [session.processingStatus, session.analysisResult, setStep]);
+
   // If analysis error occurred
   if (session.processingStatus === 'error' || session.analysisError) {
     const error = session.analysisError || {
@@ -72,72 +79,6 @@ export function AnalyzingStep() {
             className="w-full h-10 px-4 rounded-[3px] border border-luma-border text-luma-secondary hover:text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors"
           >
             ← Retake or Upload Photo
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // If analysis completed successfully (interim presentation before Feature 8 full report)
-  if (session.processingStatus === 'done' && session.analysisResult) {
-    const result = session.analysisResult;
-    return (
-      <div className="flex flex-col items-center text-center p-6 sm:p-8">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[0.625rem] font-medium tracking-[0.08em] uppercase mb-4">
-          <span aria-hidden="true">✓</span>
-          <span>Simulation Complete</span>
-        </div>
-
-        <h3 className="font-display text-2xl font-light text-luma-ink leading-tight mb-2">
-          Observations Ready
-        </h3>
-
-        <p className="text-xs text-luma-secondary leading-relaxed max-w-[320px] mb-5">
-          Simulated diagnostic profile derived deterministically for demonstration:
-        </p>
-
-        {/* Observations list */}
-        <div className="w-full max-w-[340px] flex flex-col gap-2.5 mb-6 text-left">
-          {result.observations.map((obs) => (
-            <div
-              key={obs.label}
-              className="p-3 rounded-xl bg-luma-subtle border border-luma-border"
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold text-luma-ink">{obs.label}</span>
-                <span className="text-[0.6875rem] font-medium text-luma-accent bg-luma-surface px-2 py-0.5 rounded border border-luma-border">
-                  {obs.value}
-                </span>
-              </div>
-              <p className="text-[0.6875rem] text-luma-secondary leading-relaxed">
-                {obs.note}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Educational disclaimer */}
-        <div className="w-full max-w-[340px] p-3 rounded-xl bg-amber-50/70 border border-amber-200/60 text-left mb-6">
-          <p className="text-[0.6875rem] text-amber-900 leading-relaxed">
-            <strong>Illustrative Disclaimer:</strong> These metrics are simulated for demonstration and do not constitute medical or dermatological advice.
-          </p>
-        </div>
-
-        <div className="w-full max-w-[340px] flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setStep('capture')}
-            className="flex-1 h-10 px-4 rounded-[3px] border border-luma-border text-luma-secondary hover:text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors"
-          >
-            ← Retake Photo
-          </button>
-
-          <button
-            type="button"
-            onClick={() => startAnalysis()}
-            className="flex-1 h-10 px-4 rounded-[3px] border border-luma-border-strong text-luma-ink hover:bg-luma-subtle text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors"
-          >
-            ↻ Re-Analyze
           </button>
         </div>
       </div>
