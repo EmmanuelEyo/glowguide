@@ -17,6 +17,7 @@ import type {
   CameraState,
   ConsentGivenEvent,
   ProcessingStatus,
+  RecommendedProduct,
   ScanCompleteEvent,
   ScanStartedEvent,
   SessionState,
@@ -26,6 +27,7 @@ import type {
   WidgetMode,
 } from '../types/widget';
 import { analyzeSkin } from '../services/skinAnalysis';
+import { getRecommendations } from '../services/recommendationEngine';
 
 const DEFAULT_CONFIG: WidgetConfig = {
   storeId: 'luma-beauty',
@@ -93,6 +95,7 @@ export function WidgetProvider({
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>('idle');
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [analysisError, setAnalysisError] = useState<AnalysisError | null>(null);
+  const [recommendations, setRecommendations] = useState<RecommendedProduct[]>([]);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -209,6 +212,7 @@ export function WidgetProvider({
     setProcessingStatus('idle');
     setAnalysisResult(null);
     setAnalysisError(null);
+    setRecommendations([]);
   }, []);
 
   const startAnalysis = useCallback(
@@ -222,6 +226,7 @@ export function WidgetProvider({
       setProcessingStatus('loading');
       setAnalysisError(null);
       setAnalysisResult(null);
+      setRecommendations([]);
       setCurrentStep('analyzing');
 
       const timestamp = new Date().toISOString();
@@ -235,6 +240,8 @@ export function WidgetProvider({
         });
 
         setAnalysisResult(result);
+        const recs = getRecommendations(result, mergedConfig.products);
+        setRecommendations(recs);
         setProcessingStatus('done');
         setCurrentStep('report');
         onScanComplete?.({ sessionId, result });
@@ -253,7 +260,7 @@ export function WidgetProvider({
         }
       }
     },
-    [sessionId, capturedImageUrl, onScanStarted, onScanComplete],
+    [sessionId, capturedImageUrl, mergedConfig.products, onScanStarted, onScanComplete],
   );
 
   const resetSession = useCallback(() => {
@@ -272,6 +279,7 @@ export function WidgetProvider({
     setProcessingStatus('idle');
     setAnalysisResult(null);
     setAnalysisError(null);
+    setRecommendations([]);
     setSessionId(generateSessionId());
     setCurrentStep('welcome');
     setConsentGiven(false);
@@ -319,6 +327,7 @@ export function WidgetProvider({
       processingStatus,
       analysisResult,
       analysisError,
+      recommendations,
     }),
     [
       sessionId,
@@ -331,6 +340,7 @@ export function WidgetProvider({
       processingStatus,
       analysisResult,
       analysisError,
+      recommendations,
     ],
   );
 
@@ -341,6 +351,7 @@ export function WidgetProvider({
       session,
       currentStep,
       config: mergedConfig,
+      recommendations,
       openWidget,
       closeWidget,
       toggleWidget,
@@ -364,6 +375,7 @@ export function WidgetProvider({
       session,
       currentStep,
       mergedConfig,
+      recommendations,
       openWidget,
       closeWidget,
       toggleWidget,

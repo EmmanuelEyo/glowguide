@@ -22,6 +22,7 @@ function SessionInspector() {
     startAnalysis,
     cancelAnalysis,
     resetAnalysis,
+    recommendations,
   } = useWidget();
   const [copied, setCopied] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<string>('auto');
@@ -291,6 +292,46 @@ function SessionInspector() {
                   <span className="text-emerald-800">
                     {obs.value} ({obs.score}%)
                   </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recommendations Inspector (Feature 9) */}
+        {recommendations && recommendations.length > 0 && (
+          <div className="p-3 rounded-xl border border-luma-accent/30 bg-luma-accent/5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[0.6875rem] uppercase tracking-wider text-luma-accent font-semibold">
+                Recommendations ({recommendations.length})
+              </span>
+              <span className="text-[0.625rem] text-luma-secondary font-mono">
+                Curated Routine
+              </span>
+            </div>
+            <div className="space-y-2">
+              {recommendations.map((prod) => (
+                <div
+                  key={prod.id}
+                  className="p-2 rounded-lg bg-luma-surface border border-luma-border text-left"
+                >
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-[0.6875rem] font-semibold text-luma-ink truncate">
+                      {prod.name}
+                    </span>
+                    <span className="text-[0.625rem] font-mono text-luma-accent font-medium">
+                      {prod.matchScore}%
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[0.625rem] text-luma-secondary">
+                    <span className="uppercase tracking-wider capitalize text-luma-ghost">
+                      {prod.routineStep}
+                    </span>
+                    <span className="font-medium text-luma-ink">£{prod.price.toFixed(2)}</span>
+                  </div>
+                  <p className="text-[0.5625rem] text-luma-secondary mt-1 leading-normal italic">
+                    &ldquo;{prod.matchReason}&rdquo;
+                  </p>
                 </div>
               ))}
             </div>

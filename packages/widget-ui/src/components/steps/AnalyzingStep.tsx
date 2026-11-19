@@ -62,22 +62,11 @@ export function AnalyzingStep() {
         </div>
 
         <div className="w-full max-w-[340px] flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={() => startAnalysis()}
-            className="w-full h-11 px-6 rounded-[3px] bg-luma-accent hover:bg-luma-accent-dark text-luma-inverse text-xs font-medium tracking-[0.1em] uppercase transition-colors flex items-center justify-center gap-2"
-          >
+          <button type="button" onClick={() => startAnalysis()} className="w-full h-11 px-6 rounded-[3px] bg-luma-accent hover:bg-luma-accent-dark text-luma-inverse text-xs font-medium tracking-[0.1em] uppercase transition-colors flex items-center justify-center gap-2">
             <span>↻</span> Try Analysis Again
           </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              cancelAnalysis();
-              prevStep();
-            }}
-            className="w-full h-10 px-4 rounded-[3px] border border-luma-border text-luma-secondary hover:text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors"
-          >
+          <button type="button" onClick={() => { cancelAnalysis(); prevStep(); }} className="w-full h-10 px-4 rounded-[3px] border border-luma-border text-luma-secondary hover:text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors">
             ← Retake or Upload Photo
           </button>
         </div>
@@ -106,11 +95,7 @@ export function AnalyzingStep() {
       <div className="w-full max-w-[280px] aspect-[4/3] rounded-2xl bg-luma-canvas border border-luma-border overflow-hidden shadow-inner mb-6 relative">
         {session.capturedImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={session.capturedImageUrl}
-            alt="Skin snapshot being analyzed"
-            className="w-full h-full object-cover opacity-75"
-          />
+          <img src={session.capturedImageUrl} alt="Skin snapshot being analyzed" className="w-full h-full object-cover opacity-75" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-luma-ghost text-4xl">
             ✦
@@ -146,11 +131,7 @@ export function AnalyzingStep() {
       </div>
 
       {/* Cancel action */}
-      <button
-        type="button"
-        onClick={cancelAnalysis}
-        className="h-10 px-6 rounded-[3px] border border-luma-border text-luma-secondary hover:text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors"
-      >
+      <button type="button" onClick={cancelAnalysis} className="h-10 px-6 rounded-[3px] border border-luma-border text-luma-secondary hover:text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors">
         Cancel Analysis
       </button>
     </div>

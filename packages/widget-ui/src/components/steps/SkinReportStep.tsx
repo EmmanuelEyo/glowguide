@@ -1,6 +1,7 @@
 'use client';
 
 import { useWidget } from '../../context/WidgetContext';
+import { RecommendedProducts } from '../recommendations/RecommendedProducts';
 import type { ObservationLevel } from '../../types/widget';
 
 const SCORE_WIDTH_CLASSES: Record<number, string> = {
@@ -61,8 +62,15 @@ function getLevelBadge(level?: ObservationLevel) {
 }
 
 export function SkinReportStep() {
-  const { session, setStep, startAnalysis, resetSession } = useWidget();
+  const { session, setStep, startAnalysis, resetSession, recommendations } = useWidget();
   const result = session.analysisResult;
+
+  const handleScrollToRecommendations = () => {
+    const el = document.getElementById('recommended-routine');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   // Fallback if navigated to report without an active analysis result
   if (!result) {
@@ -202,6 +210,9 @@ export function SkinReportStep() {
         })}
       </div>
 
+      {/* Recommended Products Section */}
+      <RecommendedProducts recommendations={recommendations} />
+
       {/* Illustrative Simulation Disclaimer */}
       <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/60 text-left">
         <p className="text-[0.6875rem] text-amber-900 leading-relaxed">
@@ -213,10 +224,7 @@ export function SkinReportStep() {
       <div className="flex flex-col gap-2.5 pt-2">
         <button
           type="button"
-          onClick={() => {
-            // Prepares for Feature 9 (product recommendations)
-            setStep('report');
-          }}
+          onClick={handleScrollToRecommendations}
           className="w-full h-11 px-6 rounded-[3px] bg-luma-accent hover:bg-luma-accent-dark text-luma-inverse text-xs font-medium tracking-[0.1em] uppercase transition-colors flex items-center justify-center gap-2 shadow-sm"
         >
           <span>✦</span> View Recommended Products

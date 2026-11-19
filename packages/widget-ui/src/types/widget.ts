@@ -69,6 +69,27 @@ export interface ScanCompleteEvent {
   result: AnalysisResult;
 }
 
+export interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  description: string;
+  price: number;
+  category: string;
+  tags: string[];
+  gradient?: string;
+  emoji?: string;
+  imageUrl?: string;
+}
+
+export type RoutineStep = 'prep' | 'treat' | 'hydrate' | 'protect';
+
+export interface RecommendedProduct extends Product {
+  matchReason: string;
+  routineStep: RoutineStep;
+  matchScore: number;
+}
+
 export interface WidgetConfig {
   storeId: string;
   mode?: WidgetMode;
@@ -77,6 +98,7 @@ export interface WidgetConfig {
   theme?: WidgetTheme;
   launcherPosition?: LauncherPosition;
   autoOpen?: boolean;
+  products?: Product[];
 }
 
 export interface WidgetStep {
@@ -97,6 +119,7 @@ export interface SessionState {
   processingStatus: ProcessingStatus;
   analysisResult: AnalysisResult | null;
   analysisError: AnalysisError | null;
+  recommendations: RecommendedProduct[];
 }
 
 export interface ConsentGivenEvent {
@@ -110,6 +133,7 @@ export interface WidgetContextValue {
   session: SessionState;
   currentStep: SessionStepId;
   config: WidgetConfig;
+  recommendations: RecommendedProduct[];
   openWidget: () => void;
   closeWidget: () => void;
   toggleWidget: () => void;

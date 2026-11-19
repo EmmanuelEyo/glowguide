@@ -13,5 +13,7 @@ export * from './components/steps/ConsentStep';
 export * from './components/steps/CameraCaptureStep';
 export * from './components/steps/AnalyzingStep';
 export * from './components/steps/SkinReportStep';
+export * from './components/recommendations/RecommendedProducts';
 export * from './components/camera/CameraErrorRecovery';
 export * from './services/skinAnalysis';
+export * from './services/recommendationEngine';
