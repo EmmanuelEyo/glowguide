@@ -5,6 +5,19 @@ export type LauncherPosition = 'bottom-right' | 'bottom-left' | string;
 export type SessionStepId = 'welcome' | 'consent' | 'capture';
 export type CameraState = 'idle' | 'active' | 'error' | 'denied';
 
+export type CameraErrorCode =
+  | 'PERMISSION_DENIED'
+  | 'NO_CAMERA_FOUND'
+  | 'CAMERA_IN_USE'
+  | 'UNSUPPORTED'
+  | 'DISCONNECTED'
+  | 'UNKNOWN';
+
+export interface CameraErrorEvent {
+  code: CameraErrorCode;
+  message: string;
+}
+
 export interface WidgetConfig {
   storeId: string;
   mode?: WidgetMode;
@@ -29,6 +42,7 @@ export interface SessionState {
   consentTimestamp: string | null;
   cameraState: CameraState;
   capturedImageUrl: string | null;
+  cameraError: CameraErrorEvent | null;
 }
 
 export interface ConsentGivenEvent {
@@ -53,4 +67,6 @@ export interface WidgetContextValue {
   setCameraState: (cameraState: CameraState) => void;
   setCapturedImage: (imageUrl: string) => void;
   clearCapturedImage: () => void;
+  setCameraError: (error: CameraErrorEvent | null) => void;
+  clearCameraError: () => void;
 }

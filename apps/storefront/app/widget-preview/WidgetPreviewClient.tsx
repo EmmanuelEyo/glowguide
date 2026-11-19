@@ -5,7 +5,15 @@ import { WidgetProvider, InlineWidget, useWidget } from '@glowguide/widget-ui';
 import type { SessionStepId } from '@glowguide/widget-ui';
 
 function SessionInspector() {
-  const { session, currentStep, setStep, resetSession } = useWidget();
+  const {
+    session,
+    currentStep,
+    setStep,
+    resetSession,
+    setCameraState,
+    setCameraError,
+    clearCameraError,
+  } = useWidget();
   const [copied, setCopied] = useState(false);
 
   const handleCopySessionId = async () => {
@@ -25,6 +33,20 @@ function SessionInspector() {
     { id: 'consent', label: 'Consent', number: 2 },
     { id: 'capture', label: 'Capture', number: 3 },
   ];
+
+  const handleSimulateError = (
+    code: 'PERMISSION_DENIED' | 'CAMERA_IN_USE' | 'NO_CAMERA_FOUND' | 'DISCONNECTED',
+    message: string,
+  ) => {
+    setStep('capture');
+    setCameraState(code === 'PERMISSION_DENIED' ? 'denied' : 'error');
+    setCameraError({ code, message });
+  };
+
+  const handleClearError = () => {
+    clearCameraError();
+    setCameraState('idle');
+  };
 
   return (
     <div className="flex flex-col bg-luma-surface rounded-2xl border border-luma-border p-6 shadow-sm">
@@ -112,14 +134,7 @@ function SessionInspector() {
               Camera State
             </span>
             <div className="flex items-center gap-2">
-              <span
-                className={`w-2 h-2 rounded-full ${session.cameraState === 'active'
-                    ? 'bg-emerald-500'
-                    : session.cameraState === 'error' || session.cameraState === 'denied'
-                      ? 'bg-red-500'
-                      : 'bg-zinc-400'
-                  }`}
-              />
+              <span className={`w-2 h-2 rounded-full ${session.cameraState === 'active' ? 'bg-emerald-500': session.cameraState === 'error' || session.cameraState === 'denied' ? 'bg-red-500' : 'bg-zinc-400'}`} />
               <span className="text-xs font-semibold text-luma-ink capitalize">
                 {session.cameraState}
               </span>
@@ -159,6 +174,55 @@ function SessionInspector() {
           ) : (
             <p className="text-xs text-luma-ghost italic">No image captured yet</p>
           )}
+        </div>
+
+        {/* Camera Error State */}
+        {session.cameraError && (
+          <div className="p-3 rounded-xl border border-amber-200 bg-amber-50">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[0.6875rem] uppercase tracking-wider text-amber-800 font-semibold">
+                Camera Error
+              </span>
+              <button
+                type="button"
+                onClick={handleClearError}
+                className="text-[0.625rem] text-amber-700 hover:underline font-mono"
+              >
+                Clear
+              </button>
+            </div>
+            <p className="text-xs font-mono text-amber-900">{session.cameraError.code}</p>
+            <p className="text-[0.6875rem] text-amber-700 mt-0.5">{session.cameraError.message}</p>
+          </div>
+        )}
+
+        {/* Error Simulation Controls */}
+        <div className="bg-luma-subtle p-3 rounded-xl border border-luma-border">
+          <span className="block text-[0.6875rem] uppercase tracking-wider text-luma-ghost mb-2">
+            Simulate Camera Error
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { code: 'PERMISSION_DENIED', label: 'Denied', msg: 'Camera permission was denied.' },
+              { code: 'CAMERA_IN_USE', label: 'In Use', msg: 'Camera is in use by another app.' },
+              { code: 'NO_CAMERA_FOUND', label: 'No Camera', msg: 'No camera device was detected.' },
+              { code: 'DISCONNECTED', label: 'Disconnect', msg: 'Camera device was disconnected.' },
+            ].map(({ code, label, msg }) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() =>
+                  handleSimulateError(
+                    code as 'PERMISSION_DENIED' | 'CAMERA_IN_USE' | 'NO_CAMERA_FOUND' | 'DISCONNECTED',
+                    msg,
+                  )
+                }
+                className="text-[0.625rem] px-2 py-1 rounded border border-amber-300 text-amber-800 bg-amber-50 hover:bg-amber-100 font-medium uppercase tracking-wider transition-colors"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* In-Memory Guarantee */}

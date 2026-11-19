@@ -1,29 +1,72 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CameraState } from '../types/widget';
+import type { CameraErrorCode, CameraErrorEvent, CameraState } from '../types/widget';
 
 export interface UseCameraOptions {
   autoStart?: boolean;
   onCameraStateChange?: (state: CameraState) => void;
+  onCameraError?: (error: CameraErrorEvent) => void;
 }
 
 export interface UseCameraResult {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   cameraState: CameraState;
-  error: string | null;
+  cameraError: CameraErrorEvent | null;
   startCamera: () => Promise<boolean>;
   stopCamera: () => void;
   captureFrame: () => Promise<string | null>;
+  simulateCameraError: (code: CameraErrorCode) => void;
+  clearError: () => void;
+}
+
+export function classifyCameraError(err: unknown): CameraErrorEvent {
+  const errorObj = err as { name?: string; message?: string };
+  const name = errorObj.name || '';
+
+  if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+    return {
+      code: 'PERMISSION_DENIED',
+      message: 'Camera permission was denied in your browser settings.',
+    };
+  }
+
+  if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+    return {
+      code: 'NO_CAMERA_FOUND',
+      message: 'No camera device was detected on your system.',
+    };
+  }
+
+  if (name === 'NotReadableError' || name === 'TrackStartError') {
+    return {
+      code: 'CAMERA_IN_USE',
+      message: 'Camera is currently in use by another application or browser tab.',
+    };
+  }
+
+  if (name === 'NotSupportedError') {
+    return {
+      code: 'UNSUPPORTED',
+      message: 'Camera streaming requires a secure HTTPS connection or supported browser.',
+    };
+  }
+
+  return {
+    code: 'UNKNOWN',
+    message: errorObj.message || 'Unable to access camera device.',
+  };
 }
 
 export function useCamera(options: UseCameraOptions = {}): UseCameraResult {
-  const { autoStart = true, onCameraStateChange } = options;
+  const { autoStart = true, onCameraStateChange, onCameraError } = options;
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const permissionStatusRef = useRef<PermissionStatus | null>(null);
+
   const [cameraState, setCameraState] = useState<CameraState>('idle');
-  const [error, setError] = useState<string | null>(null);
+  const [cameraError, setCameraError] = useState<CameraErrorEvent | null>(null);
 
   const updateState = useCallback(
     (newState: CameraState) => {
@@ -33,10 +76,27 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraResult {
     [onCameraStateChange],
   );
 
+  const reportError = useCallback(
+    (errEvent: CameraErrorEvent) => {
+      setCameraError(errEvent);
+      onCameraError?.(errEvent);
+      const nextState: CameraState =
+        errEvent.code === 'PERMISSION_DENIED' ? 'denied' : 'error';
+      updateState(nextState);
+    },
+    [onCameraError, updateState],
+  );
+
+  const clearError = useCallback(() => {
+    setCameraError(null);
+    updateState('idle');
+  }, [updateState]);
+
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => {
         try {
+          track.onended = null;
           track.stop();
         } catch {
           // ignore track stop failures
@@ -68,14 +128,17 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraResult {
       !navigator.mediaDevices ||
       !navigator.mediaDevices.getUserMedia
     ) {
-      setError('Camera API is not supported in this browser environment.');
-      updateState('error');
+      const unsupportedErr: CameraErrorEvent = {
+        code: 'UNSUPPORTED',
+        message: 'Camera API is not supported in this browser or insecure connection.',
+      };
+      reportError(unsupportedErr);
       return false;
     }
 
     try {
       updateState('idle');
-      setError(null);
+      setCameraError(null);
 
       const constraints: MediaStreamConstraints = {
         video: {
@@ -89,9 +152,19 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraResult {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
 
+      // Listen for unexpected track disconnection / hardware unplugging
+      stream.getVideoTracks().forEach((track) => {
+        track.onended = () => {
+          const disconnectErr: CameraErrorEvent = {
+            code: 'DISCONNECTED',
+            message: 'Camera device was disconnected.',
+          };
+          reportError(disconnectErr);
+        };
+      });
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        // play video once metadata is ready
         videoRef.current.onloadedmetadata = () => {
           videoRef.current?.play().catch(() => {
             // auto-play restrictions handled gracefully
@@ -102,20 +175,27 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraResult {
       updateState('active');
       return true;
     } catch (err: unknown) {
-      const errorObj = err as { name?: string; message?: string };
-      if (
-        errorObj.name === 'NotAllowedError' ||
-        errorObj.name === 'PermissionDeniedError'
-      ) {
-        setError('Camera permission was denied.');
-        updateState('denied');
-      } else {
-        setError(errorObj.message || 'Unable to access camera device.');
-        updateState('error');
-      }
+      const parsedError = classifyCameraError(err);
+      reportError(parsedError);
       return false;
     }
-  }, [stopCamera, updateState]);
+  }, [stopCamera, updateState, reportError]);
+
+  const simulateCameraError = useCallback(
+    (code: CameraErrorCode) => {
+      stopCamera();
+      const messages: Record<CameraErrorCode, string> = {
+        PERMISSION_DENIED: 'Camera permission was denied in your browser settings.',
+        NO_CAMERA_FOUND: 'No camera device was detected on your system.',
+        CAMERA_IN_USE: 'Camera is currently in use by another application or browser tab.',
+        UNSUPPORTED: 'Camera streaming requires a secure HTTPS connection or supported browser.',
+        DISCONNECTED: 'Camera device was disconnected.',
+        UNKNOWN: 'An unexpected camera error occurred.',
+      };
+      reportError({ code, message: messages[code] });
+    },
+    [stopCamera, reportError],
+  );
 
   const captureFrame = useCallback(async (): Promise<string | null> => {
     const video = videoRef.current;
@@ -154,6 +234,41 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraResult {
     });
   }, []);
 
+  // Monitor permission queries for auto-recovery when user re-enables camera in browser settings
+  useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      'permissions' in navigator &&
+      navigator.permissions?.query
+    ) {
+      try {
+        navigator.permissions
+          .query({ name: 'camera' as PermissionName })
+          .then((status) => {
+            permissionStatusRef.current = status;
+            status.onchange = () => {
+              if (status.state === 'granted') {
+                // If permission was granted out-of-band, auto-recover!
+                clearError();
+                startCamera();
+              }
+            };
+          })
+          .catch(() => {
+            // Permissions query for camera is not supported in all browsers
+          });
+      } catch {
+        // Ignore permission query errors
+      }
+    }
+
+    return () => {
+      if (permissionStatusRef.current) {
+        permissionStatusRef.current.onchange = null;
+      }
+    };
+  }, [clearError, startCamera]);
+
   useEffect(() => {
     if (autoStart) {
       startCamera();
@@ -167,9 +282,11 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraResult {
   return {
     videoRef,
     cameraState,
-    error,
+    cameraError,
     startCamera,
     stopCamera,
     captureFrame,
+    simulateCameraError,
+    clearError,
   };
 }

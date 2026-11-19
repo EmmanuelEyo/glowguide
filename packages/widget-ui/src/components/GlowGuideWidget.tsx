@@ -3,7 +3,12 @@
 import { WidgetProvider, useWidget } from '../context/WidgetContext';
 import { FloatingWidget } from './FloatingWidget';
 import { InlineWidget } from './InlineWidget';
-import type { ConsentGivenEvent, WidgetConfig, WidgetMode } from '../types/widget';
+import type {
+  CameraErrorEvent,
+  ConsentGivenEvent,
+  WidgetConfig,
+  WidgetMode,
+} from '../types/widget';
 
 interface GlowGuideWidgetInnerProps {
   modeOverride?: WidgetMode;
@@ -26,6 +31,7 @@ export interface GlowGuideWidgetProps {
   mode?: WidgetMode;
   className?: string;
   onConsentGiven?: (event: ConsentGivenEvent) => void;
+  onCameraError?: (event: CameraErrorEvent) => void;
   children?: React.ReactNode;
 }
 
@@ -34,6 +40,7 @@ export function GlowGuideWidget({
   mode,
   className,
   onConsentGiven,
+  onCameraError,
   children,
 }: GlowGuideWidgetProps) {
   const mergedConfig: Partial<WidgetConfig> = {
@@ -42,7 +49,7 @@ export function GlowGuideWidget({
   };
 
   return (
-    <WidgetProvider config={mergedConfig} onConsentGiven={onConsentGiven}>
+    <WidgetProvider config={mergedConfig} onConsentGiven={onConsentGiven} onCameraError={onCameraError}>
       <GlowGuideWidgetInner modeOverride={mode} className={className} />
       {children}
     </WidgetProvider>

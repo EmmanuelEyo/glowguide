@@ -9,6 +9,8 @@ import {
   useState,
 } from 'react';
 import type {
+  CameraErrorCode,
+  CameraErrorEvent,
   CameraState,
   ConsentGivenEvent,
   SessionState,
@@ -48,12 +50,14 @@ interface WidgetProviderProps {
   children: React.ReactNode;
   config?: Partial<WidgetConfig>;
   onConsentGiven?: (event: ConsentGivenEvent) => void;
+  onCameraError?: (event: CameraErrorEvent) => void;
 }
 
 export function WidgetProvider({
   children,
   config: userConfig,
   onConsentGiven,
+  onCameraError,
 }: WidgetProviderProps) {
   const mergedConfig = useMemo(
     () => ({ ...DEFAULT_CONFIG, ...userConfig }),
@@ -67,6 +71,7 @@ export function WidgetProvider({
   const [consentTimestamp, setConsentTimestamp] = useState<string | null>(null);
   const [cameraState, setCameraStateState] = useState<CameraState>('idle');
   const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
+  const [cameraError, setCameraErrorState] = useState<CameraErrorEvent | null>(null);
 
   const mode: WidgetMode = mergedConfig.mode ?? 'floating';
 
@@ -132,6 +137,20 @@ export function WidgetProvider({
     });
   }, []);
 
+  const setCameraError = useCallback(
+    (err: CameraErrorEvent | null) => {
+      setCameraErrorState(err);
+      if (err) {
+        onCameraError?.(err);
+      }
+    },
+    [onCameraError],
+  );
+
+  const clearCameraError = useCallback(() => {
+    setCameraErrorState(null);
+  }, []);
+
   const resetSession = useCallback(() => {
     setCapturedImageUrl((prev) => {
       if (prev && prev.startsWith('blob:')) {
@@ -140,6 +159,7 @@ export function WidgetProvider({
       return null;
     });
     setCameraStateState('idle');
+    setCameraErrorState(null);
     setSessionId(generateSessionId());
     setCurrentStep('welcome');
     setConsentGiven(false);
@@ -180,8 +200,17 @@ export function WidgetProvider({
       consentTimestamp,
       cameraState,
       capturedImageUrl,
+      cameraError,
     }),
-    [sessionId, currentStep, consentGiven, consentTimestamp, cameraState, capturedImageUrl],
+    [
+      sessionId,
+      currentStep,
+      consentGiven,
+      consentTimestamp,
+      cameraState,
+      capturedImageUrl,
+      cameraError,
+    ],
   );
 
   const value = useMemo<WidgetContextValue>(
@@ -202,6 +231,8 @@ export function WidgetProvider({
       setCameraState,
       setCapturedImage,
       clearCapturedImage,
+      setCameraError,
+      clearCameraError,
     }),
     [
       isOpen,
@@ -220,6 +251,8 @@ export function WidgetProvider({
       setCameraState,
       setCapturedImage,
       clearCapturedImage,
+      setCameraError,
+      clearCameraError,
     ],
   );
 

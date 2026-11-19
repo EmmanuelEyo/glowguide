@@ -11,3 +11,4 @@ export * from './components/GlowGuideWidget';
 export * from './components/steps/WelcomeStep';
 export * from './components/steps/ConsentStep';
 export * from './components/steps/CameraCaptureStep';
+export * from './components/camera/CameraErrorRecovery';

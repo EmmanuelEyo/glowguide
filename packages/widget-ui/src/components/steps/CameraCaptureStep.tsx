@@ -1,18 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useWidget } from '../../context/WidgetContext';
 import { useCamera } from '../../hooks/useCamera';
 import { processImageFile } from '../../utils/imageUpload';
+import { CameraErrorRecovery } from '../camera/CameraErrorRecovery';
 
 export function CameraCaptureStep() {
-  const {
-    session,
-    prevStep,
-    setCameraState,
-    setCapturedImage,
-    clearCapturedImage,
-  } = useWidget();
+  const { isOpen, session, prevStep, setCameraState, setCameraError, clearCameraError, setCapturedImage, clearCapturedImage, } = useWidget();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -22,13 +17,15 @@ export function CameraCaptureStep() {
   const {
     videoRef,
     cameraState,
-    error: cameraError,
+    cameraError,
     startCamera,
     stopCamera,
     captureFrame,
+    clearError,
   } = useCamera({
     autoStart: !session.capturedImageUrl,
     onCameraStateChange: setCameraState,
+    onCameraError: setCameraError,
   });
 
   const handleCapture = async () => {
@@ -47,9 +44,26 @@ export function CameraCaptureStep() {
 
   const handleRetake = () => {
     clearCapturedImage();
+    clearCameraError();
+    clearError();
     setUploadError(null);
     startCamera();
   };
+
+  const handleRetryCamera = () => {
+    clearCameraError();
+    clearError();
+    setUploadError(null);
+    startCamera();
+  };
+
+  // Stop the camera stream when the floating widget is closed so the
+  // browser camera indicator light turns off while the widget is hidden.
+  useEffect(() => {
+    if (!isOpen) {
+      stopCamera();
+    }
+  }, [isOpen, stopCamera]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -58,6 +72,8 @@ export function CameraCaptureStep() {
     const result = processImageFile(file);
     if (result.success && result.imageUrl) {
       setUploadError(null);
+      clearCameraError();
+      clearError();
       setCapturedImage(result.imageUrl);
       stopCamera();
     } else if (result.error) {
@@ -78,6 +94,8 @@ export function CameraCaptureStep() {
     const result = processImageFile(file);
     if (result.success && result.imageUrl) {
       setUploadError(null);
+      clearCameraError();
+      clearError();
       setCapturedImage(result.imageUrl);
       stopCamera();
     } else if (result.error) {
@@ -154,87 +172,42 @@ export function CameraCaptureStep() {
   }
 
   // 2. Camera Error or Denied Mode
-  if (cameraState === 'error' || cameraState === 'denied') {
+  const activeError = session.cameraError || cameraError;
+  if (cameraState === 'error' || cameraState === 'denied' || activeError) {
     return (
-      <div className="flex flex-col items-center text-center p-6 sm:p-8">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[0.625rem] font-medium tracking-[0.08em] uppercase mb-4">
-          <span aria-hidden="true">⚠️</span>
-          <span>Camera {cameraState === 'denied' ? 'Permission Denied' : 'Unavailable'}</span>
-        </div>
+      <>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleFileChange}
+          className="hidden"
+          id="camera-error-upload-input"
+        />
 
-        <h3 className="font-display text-2xl font-light text-luma-ink leading-tight mb-2">
-          Upload a Photo Instead
-        </h3>
-
-        <p className="text-xs text-luma-secondary leading-relaxed max-w-[320px] mb-6">
-          {cameraError ||
-            'We were unable to access your camera. You can upload a clear photo from your device.'}
-        </p>
-
-        {/* Upload drop zone */}
-        <div
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          className={`w-full max-w-[340px] aspect-[4/3] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-6 mb-6 transition-colors ${
-            isDragOver
-              ? 'border-luma-accent bg-luma-accent/5'
-              : 'border-luma-border-mid bg-luma-page hover:bg-luma-subtle/40'
-          }`}
-        >
-          <div className="w-12 h-12 rounded-full bg-luma-blush-pale flex items-center justify-center text-xl text-luma-accent mb-3">
-            📁
-          </div>
-          <p className="text-xs font-semibold text-luma-ink mb-1">
-            Drag and drop your photo here
-          </p>
-          <p className="text-[0.6875rem] text-luma-ghost mb-4">
-            Supports JPG, PNG, WebP up to 10MB
-          </p>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={handleFileChange}
-            className="hidden"
-            id="camera-upload-input"
-          />
-
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="h-9 px-4 rounded-[3px] bg-luma-accent hover:bg-luma-accent-dark text-luma-inverse text-[0.6875rem] font-medium tracking-[0.08em] uppercase transition-colors"
-          >
-            Browse Files
-          </button>
-        </div>
+        <CameraErrorRecovery
+          error={
+            activeError || {
+              code: cameraState === 'denied' ? 'PERMISSION_DENIED' : 'UNKNOWN',
+              message:
+                cameraState === 'denied'
+                  ? 'Camera permission was denied in your browser settings.'
+                  : 'Unable to access camera device.',
+            }
+          }
+          onRetry={handleRetryCamera}
+          onUploadClick={() => fileInputRef.current?.click()}
+          onBack={prevStep}
+        />
 
         {uploadError && (
-          <div className="w-full max-w-[340px] p-3 rounded-lg bg-red-50 text-red-700 text-xs mb-4">
-            {uploadError}
+          <div className="w-full max-w-[340px] mx-auto px-6 pb-6">
+            <div className="p-3 rounded-lg bg-red-50 text-red-700 text-xs text-center">
+              {uploadError}
+            </div>
           </div>
         )}
-
-        {/* Navigation actions */}
-        <div className="w-full max-w-[340px] flex items-center gap-3">
-          <button
-            type="button"
-            onClick={prevStep}
-            className="h-10 px-4 rounded-[3px] border border-luma-border text-luma-secondary hover:text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors"
-          >
-            ← Back
-          </button>
-
-          <button
-            type="button"
-            onClick={() => startCamera()}
-            className="flex-1 h-10 px-4 rounded-[3px] border border-luma-border-strong text-luma-ink hover:bg-luma-subtle text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors"
-          >
-            Try Camera Again
-          </button>
-        </div>
-      </div>
+      </>
     );
   }
 
@@ -244,9 +217,8 @@ export function CameraCaptureStep() {
       {/* Live badge */}
       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-luma-subtle border border-luma-border text-[0.625rem] font-medium tracking-[0.08em] uppercase text-luma-secondary mb-4">
         <span
-          className={`w-2 h-2 rounded-full ${
-            cameraState === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'
-          }`}
+          className={`w-2 h-2 rounded-full ${cameraState === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'
+            }`}
           aria-hidden="true"
         />
         <span>{cameraState === 'active' ? 'Live Camera' : 'Initializing Camera...'}</span>
@@ -265,9 +237,8 @@ export function CameraCaptureStep() {
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`w-full max-w-[340px] aspect-[4/3] rounded-2xl bg-luma-canvas border border-luma-border relative overflow-hidden mb-4 shadow-inner ${
-          isDragOver ? 'ring-2 ring-luma-accent' : ''
-        }`}
+        className={`w-full max-w-[340px] aspect-[4/3] rounded-2xl bg-luma-canvas border border-luma-border relative overflow-hidden mb-4 shadow-inner ${isDragOver ? 'ring-2 ring-luma-accent' : ''
+          }`}
       >
         <video
           ref={videoRef}
