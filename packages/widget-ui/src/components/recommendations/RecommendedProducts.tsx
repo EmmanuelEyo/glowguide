@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { RecommendedProduct, RoutineStep } from '../../types/widget';
+import { useWidget } from '../../context/WidgetContext';
 
 interface RecommendedProductsProps {
   recommendations: RecommendedProduct[];
   className?: string;
   onAddToCart?: (product: RecommendedProduct) => void;
+  onAddAllToCart?: (products: RecommendedProduct[]) => void;
+  onCheckoutRequest?: (productIds: string[]) => void;
 }
 
 const ROUTINE_STEP_LABELS: Record<RoutineStep, { stepNum: number; label: string; badge: string }> = {
@@ -36,15 +39,51 @@ export function RecommendedProducts({
   recommendations,
   className = '',
   onAddToCart,
+  onAddAllToCart,
+  onCheckoutRequest,
 }: RecommendedProductsProps) {
-  const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
+  const {
+    addToCart: contextAddToCart,
+    addAllToCart: contextAddAllToCart,
+    requestCheckout: contextRequestCheckout,
+    addedProductIds,
+  } = useWidget();
+
+  const [recentlyAddedIds, setRecentlyAddedIds] = useState<Record<string, boolean>>({});
+  const [allRecentlyAdded, setAllRecentlyAdded] = useState(false);
+
+  const totalRoutinePrice = useMemo(
+    () => recommendations.reduce((sum, p) => sum + p.price, 0),
+    [recommendations],
+  );
+
+  const allAdded = useMemo(
+    () => recommendations.length > 0 && recommendations.every((p) => addedProductIds.includes(p.id)),
+    [recommendations, addedProductIds],
+  );
 
   const handleAdd = (product: RecommendedProduct) => {
-    setAddedIds((prev) => ({ ...prev, [product.id]: true }));
+    setRecentlyAddedIds((prev) => ({ ...prev, [product.id]: true }));
+    contextAddToCart(product);
     onAddToCart?.(product);
     setTimeout(() => {
-      setAddedIds((prev) => ({ ...prev, [product.id]: false }));
-    }, 1800);
+      setRecentlyAddedIds((prev) => ({ ...prev, [product.id]: false }));
+    }, 2000);
+  };
+
+  const handleAddAll = () => {
+    setAllRecentlyAdded(true);
+    contextAddAllToCart(recommendations);
+    onAddAllToCart?.(recommendations);
+    setTimeout(() => {
+      setAllRecentlyAdded(false);
+    }, 2000);
+  };
+
+  const handleCheckout = () => {
+    const ids = recommendations.map((p) => p.id);
+    contextRequestCheckout(ids);
+    onCheckoutRequest?.(ids);
   };
 
   if (recommendations.length === 0) {
@@ -77,6 +116,46 @@ export function RecommendedProducts({
         Curated active formulations selected to address your diagnosed skin focus and moisture balance.
       </p>
 
+      {/* Routine Bundle Bar */}
+      <div className="p-3 rounded-xl bg-luma-accent/10 border border-luma-accent/25 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <span className="text-[0.625rem] uppercase tracking-wider text-luma-accent font-semibold block">
+            Complete Routine Bundle
+          </span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-xs font-semibold text-luma-ink font-mono">
+              £{totalRoutinePrice.toFixed(2)}
+            </span>
+            <span className="text-[0.625rem] text-luma-secondary">
+              ({recommendations.length} products)
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAddAll}
+          className={`h-9 px-3.5 rounded-[3px] text-[0.625rem] font-medium tracking-[0.08em] uppercase transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-sm ${
+            allAdded || allRecentlyAdded
+              ? 'bg-emerald-700 text-white'
+              : 'bg-luma-accent hover:bg-luma-accent-dark text-luma-inverse'
+          }`}
+          aria-label="Add complete recommended routine to shopping bag"
+        >
+          {allAdded || allRecentlyAdded ? (
+            <>
+              <span aria-hidden="true">✓</span>
+              <span>Routine in Bag</span>
+            </>
+          ) : (
+            <>
+              <span aria-hidden="true">✦</span>
+              <span>Add All to Bag</span>
+            </>
+          )}
+        </button>
+      </div>
+
       {/* Product List */}
       <div className="space-y-3 pt-1">
         {recommendations.map((product) => {
@@ -85,7 +164,7 @@ export function RecommendedProducts({
             label: product.routineStep,
             badge: 'bg-luma-subtle text-luma-secondary border-luma-border',
           };
-          const isAdded = !!addedIds[product.id];
+          const isAdded = addedProductIds.includes(product.id) || !!recentlyAddedIds[product.id];
 
           return (
             <div
@@ -164,6 +243,18 @@ export function RecommendedProducts({
             </div>
           );
         })}
+      </div>
+
+      {/* Routine Checkout CTA */}
+      <div className="pt-1">
+        <button
+          type="button"
+          onClick={handleCheckout}
+          className="w-full h-10 px-4 rounded-[3px] border border-luma-border hover:border-luma-accent text-luma-ink hover:text-luma-accent text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors flex items-center justify-center gap-2"
+        >
+          <span>Proceed to Checkout</span>
+          <span aria-hidden="true">→</span>
+        </button>
       </div>
     </div>
   );

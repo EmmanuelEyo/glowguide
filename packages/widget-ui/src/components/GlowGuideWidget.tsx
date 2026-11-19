@@ -4,7 +4,9 @@ import { WidgetProvider, useWidget } from '../context/WidgetContext';
 import { FloatingWidget } from './FloatingWidget';
 import { InlineWidget } from './InlineWidget';
 import type {
+  AddToCartEvent,
   CameraErrorEvent,
+  CheckoutRequestEvent,
   ConsentGivenEvent,
   ScanCompleteEvent,
   ScanStartedEvent,
@@ -36,6 +38,8 @@ export interface GlowGuideWidgetProps {
   onCameraError?: (event: CameraErrorEvent) => void;
   onScanStarted?: (event: ScanStartedEvent) => void;
   onScanComplete?: (event: ScanCompleteEvent) => void;
+  onAddToCart?: (event: AddToCartEvent) => void;
+  onCheckoutRequest?: (event: CheckoutRequestEvent) => void;
   children?: React.ReactNode;
 }
 
@@ -47,6 +51,8 @@ export function GlowGuideWidget({
   onCameraError,
   onScanStarted,
   onScanComplete,
+  onAddToCart,
+  onCheckoutRequest,
   children,
 }: GlowGuideWidgetProps) {
   const mergedConfig: Partial<WidgetConfig> = {
@@ -61,6 +67,8 @@ export function GlowGuideWidget({
       onCameraError={onCameraError}
       onScanStarted={onScanStarted}
       onScanComplete={onScanComplete}
+      onAddToCart={onAddToCart}
+      onCheckoutRequest={onCheckoutRequest}
     >
       <GlowGuideWidgetInner modeOverride={mode} className={className} />
       {children}

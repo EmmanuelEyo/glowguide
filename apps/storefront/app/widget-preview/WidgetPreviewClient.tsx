@@ -8,9 +8,26 @@ import {
   SCENARIO_KEYS,
   MOCK_SCENARIOS,
 } from '@glowguide/widget-ui';
-import type { SessionStepId } from '@glowguide/widget-ui';
+import type {
+  AddToCartEvent,
+  CheckoutRequestEvent,
+  SessionStepId,
+} from '@glowguide/widget-ui';
+import { useCart } from '@/contexts/CartContext';
 
-function SessionInspector() {
+interface CartLogEntry {
+  id: string;
+  type: 'add-to-cart' | 'checkout-request';
+  summary: string;
+  timestamp: string;
+}
+
+interface SessionInspectorProps {
+  cartEvents: CartLogEntry[];
+  onClearEvents: () => void;
+}
+
+function SessionInspector({ cartEvents, onClearEvents }: SessionInspectorProps) {
   const {
     session,
     currentStep,
@@ -23,7 +40,10 @@ function SessionInspector() {
     cancelAnalysis,
     resetAnalysis,
     recommendations,
+    addedProductIds,
+    cartInteraction,
   } = useWidget();
+  const { itemCount, subtotal, openCart } = useCart();
   const [copied, setCopied] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<string>('auto');
 
@@ -338,6 +358,104 @@ function SessionInspector() {
           </div>
         )}
 
+        {/* Host Storefront Cart Synchronization (Feature 10) */}
+        <div className="p-3.5 rounded-xl border border-luma-accent/30 bg-luma-accent/5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[0.6875rem] uppercase tracking-wider text-luma-accent font-semibold">
+              Host Cart Sync & Events
+            </span>
+            <button
+              type="button"
+              onClick={openCart}
+              className="text-[0.625rem] text-luma-accent hover:underline font-mono"
+            >
+              Open Drawer ({itemCount})
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="p-2 rounded-lg bg-luma-surface border border-luma-border">
+              <span className="text-[0.5625rem] uppercase tracking-wider text-luma-ghost block">
+                Storefront Cart
+              </span>
+              <span className="text-xs font-semibold text-luma-ink font-mono">
+                {itemCount} {itemCount === 1 ? 'item' : 'items'} (£{subtotal.toFixed(2)})
+              </span>
+            </div>
+
+            <div className="p-2 rounded-lg bg-luma-surface border border-luma-border">
+              <span className="text-[0.5625rem] uppercase tracking-wider text-luma-ghost block">
+                Session Added
+              </span>
+              <span className="text-xs font-semibold text-luma-ink font-mono">
+                {addedProductIds.length} {addedProductIds.length === 1 ? 'product' : 'products'}
+              </span>
+            </div>
+          </div>
+
+          {/* Last Interaction */}
+          {cartInteraction && (
+            <div className="p-2 rounded-lg bg-luma-surface border border-luma-border text-left mb-3">
+              <span className="text-[0.5625rem] uppercase tracking-wider text-luma-ghost block mb-0.5">
+                Last Interaction
+              </span>
+              <div className="flex items-center justify-between text-[0.6875rem]">
+                <span className="font-mono text-emerald-800 font-medium">
+                  {cartInteraction.action.toUpperCase()}
+                </span>
+                <span className="text-luma-secondary text-[0.625rem] font-mono">
+                  {cartInteraction.productId}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Real-time Event Stream */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[0.625rem] uppercase tracking-wider text-luma-ghost font-medium">
+                Dispatched Event Log ({cartEvents.length})
+              </span>
+              {cartEvents.length > 0 && (
+                <button
+                  type="button"
+                  onClick={onClearEvents}
+                  className="text-[0.5625rem] text-luma-ghost hover:text-luma-ink font-mono"
+                >
+                  Clear Log
+                </button>
+              )}
+            </div>
+
+            {cartEvents.length === 0 ? (
+              <p className="text-[0.625rem] text-luma-ghost italic p-2 bg-luma-surface rounded-lg border border-luma-border text-center">
+                No cart events dispatched yet. Click &ldquo;Add to Bag&rdquo; in recommendations to trigger.
+              </p>
+            ) : (
+              <div className="space-y-1.5 max-h-36 overflow-y-auto">
+                {cartEvents.map((evt) => (
+                  <div
+                    key={evt.id}
+                    className="p-1.5 rounded bg-luma-surface border border-luma-border text-left"
+                  >
+                    <div className="flex items-center justify-between text-[0.5625rem] mb-0.5">
+                      <span className="font-mono text-luma-accent font-semibold uppercase">
+                        {evt.type}
+                      </span>
+                      <span className="font-mono text-luma-ghost">
+                        {evt.timestamp.split('T')[1]?.slice(0, 8)}
+                      </span>
+                    </div>
+                    <p className="text-[0.625rem] text-luma-ink font-mono truncate">
+                      {evt.summary}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Captured Image Inspector */}
         <div className="bg-luma-subtle p-3 rounded-xl border border-luma-border">
           <div className="flex items-center justify-between mb-2">
@@ -439,6 +557,40 @@ function SessionInspector() {
 }
 
 export function WidgetPreviewClient() {
+  const { addItem, openCart } = useCart();
+  const [cartEvents, setCartEvents] = useState<CartLogEntry[]>([]);
+
+  const handleAddToCart = (event: AddToCartEvent) => {
+    addItem(event.productId, event.quantity || 1);
+    setCartEvents((prev) => [
+      {
+        id: 'evt_' + Math.random().toString(36).substring(2, 9),
+        type: 'add-to-cart',
+        summary: `Added "${event.product?.name || event.productId}" (qty: ${event.quantity})`,
+        timestamp: event.timestamp,
+      },
+      ...prev,
+    ]);
+    openCart();
+  };
+
+  const handleCheckoutRequest = (event: CheckoutRequestEvent) => {
+    setCartEvents((prev) => [
+      {
+        id: 'evt_' + Math.random().toString(36).substring(2, 9),
+        type: 'checkout-request',
+        summary: `Checkout routine with ${event.productIds.length} products`,
+        timestamp: event.timestamp,
+      },
+      ...prev,
+    ]);
+    openCart();
+  };
+
+  const handleClearEvents = () => {
+    setCartEvents([]);
+  };
+
   return (
     <WidgetProvider
       config={{
@@ -446,6 +598,8 @@ export function WidgetPreviewClient() {
         brandName: 'Luma Beauty',
         mode: 'inline',
       }}
+      onAddToCart={handleAddToCart}
+      onCheckoutRequest={handleCheckoutRequest}
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Inline Widget presentation */}
@@ -455,7 +609,10 @@ export function WidgetPreviewClient() {
 
         {/* Developer Session Inspector */}
         <div className="lg:col-span-5">
-          <SessionInspector />
+          <SessionInspector
+            cartEvents={cartEvents}
+            onClearEvents={handleClearEvents}
+          />
         </div>
       </div>
     </WidgetProvider>

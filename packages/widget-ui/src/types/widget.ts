@@ -69,6 +69,27 @@ export interface ScanCompleteEvent {
   result: AnalysisResult;
 }
 
+export interface AddToCartEvent {
+  productId: string;
+  quantity: number;
+  product?: RecommendedProduct;
+  timestamp: string;
+  sessionId: string;
+}
+
+export interface CheckoutRequestEvent {
+  productIds: string[];
+  timestamp: string;
+  sessionId: string;
+}
+
+export interface CartInteraction {
+  productId: string;
+  action: 'add' | 'checkout';
+  quantity?: number;
+  timestamp: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -99,6 +120,8 @@ export interface WidgetConfig {
   launcherPosition?: LauncherPosition;
   autoOpen?: boolean;
   products?: Product[];
+  onAddToCart?: (event: AddToCartEvent) => void;
+  onCheckoutRequest?: (event: CheckoutRequestEvent) => void;
 }
 
 export interface WidgetStep {
@@ -120,6 +143,8 @@ export interface SessionState {
   analysisResult: AnalysisResult | null;
   analysisError: AnalysisError | null;
   recommendations: RecommendedProduct[];
+  cartInteraction: CartInteraction | null;
+  addedProductIds: string[];
 }
 
 export interface ConsentGivenEvent {
@@ -134,6 +159,8 @@ export interface WidgetContextValue {
   currentStep: SessionStepId;
   config: WidgetConfig;
   recommendations: RecommendedProduct[];
+  addedProductIds: string[];
+  cartInteraction: CartInteraction | null;
   openWidget: () => void;
   closeWidget: () => void;
   toggleWidget: () => void;
@@ -150,4 +177,7 @@ export interface WidgetContextValue {
   startAnalysis: (scenarioOverride?: string) => Promise<AnalysisResult | null>;
   cancelAnalysis: () => void;
   resetAnalysis: () => void;
+  addToCart: (product: RecommendedProduct, quantity?: number) => void;
+  addAllToCart: (products: RecommendedProduct[]) => void;
+  requestCheckout: (productIds?: string[]) => void;
 }

@@ -10,11 +10,14 @@ import {
   useState,
 } from 'react';
 import type {
+  AddToCartEvent,
   AnalysisError,
   AnalysisResult,
   CameraErrorCode,
   CameraErrorEvent,
   CameraState,
+  CartInteraction,
+  CheckoutRequestEvent,
   ConsentGivenEvent,
   ProcessingStatus,
   RecommendedProduct,
@@ -68,6 +71,8 @@ interface WidgetProviderProps {
   onCameraError?: (event: CameraErrorEvent) => void;
   onScanStarted?: (event: ScanStartedEvent) => void;
   onScanComplete?: (event: ScanCompleteEvent) => void;
+  onAddToCart?: (event: AddToCartEvent) => void;
+  onCheckoutRequest?: (event: CheckoutRequestEvent) => void;
 }
 
 export function WidgetProvider({
@@ -77,6 +82,8 @@ export function WidgetProvider({
   onCameraError,
   onScanStarted,
   onScanComplete,
+  onAddToCart,
+  onCheckoutRequest,
 }: WidgetProviderProps) {
   const mergedConfig = useMemo(
     () => ({ ...DEFAULT_CONFIG, ...userConfig }),
@@ -96,6 +103,8 @@ export function WidgetProvider({
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [analysisError, setAnalysisError] = useState<AnalysisError | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendedProduct[]>([]);
+  const [addedProductIds, setAddedProductIds] = useState<string[]>([]);
+  const [cartInteraction, setCartInteraction] = useState<CartInteraction | null>(null);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -263,6 +272,114 @@ export function WidgetProvider({
     [sessionId, capturedImageUrl, mergedConfig.products, onScanStarted, onScanComplete],
   );
 
+  const addToCart = useCallback(
+    (product: RecommendedProduct, quantity = 1) => {
+      const timestamp = new Date().toISOString();
+      const event: AddToCartEvent = {
+        productId: product.id,
+        quantity,
+        product,
+        timestamp,
+        sessionId,
+      };
+
+      setAddedProductIds((prev) => (prev.includes(product.id) ? prev : [...prev, product.id]));
+      setCartInteraction({
+        productId: product.id,
+        action: 'add',
+        quantity,
+        timestamp,
+      });
+
+      onAddToCart?.(event);
+      mergedConfig.onAddToCart?.(event);
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('glowguide:add-to-cart', {
+            detail: event,
+            bubbles: true,
+          }),
+        );
+      }
+    },
+    [sessionId, onAddToCart, mergedConfig],
+  );
+
+  const addAllToCart = useCallback(
+    (products: RecommendedProduct[]) => {
+      if (!products || products.length === 0) return;
+      const timestamp = new Date().toISOString();
+      const newIds: string[] = [];
+
+      products.forEach((product) => {
+        newIds.push(product.id);
+        const event: AddToCartEvent = {
+          productId: product.id,
+          quantity: 1,
+          product,
+          timestamp,
+          sessionId,
+        };
+        onAddToCart?.(event);
+        mergedConfig.onAddToCart?.(event);
+
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('glowguide:add-to-cart', {
+              detail: event,
+              bubbles: true,
+            }),
+          );
+        }
+      });
+
+      setAddedProductIds((prev) => {
+        const set = new Set([...prev, ...newIds]);
+        return Array.from(set);
+      });
+
+      setCartInteraction({
+        productId: 'routine-all',
+        action: 'add',
+        quantity: products.length,
+        timestamp,
+      });
+    },
+    [sessionId, onAddToCart, mergedConfig],
+  );
+
+  const requestCheckout = useCallback(
+    (productIds?: string[]) => {
+      const ids = productIds && productIds.length > 0 ? productIds : addedProductIds;
+      const timestamp = new Date().toISOString();
+      const event: CheckoutRequestEvent = {
+        productIds: ids,
+        timestamp,
+        sessionId,
+      };
+
+      setCartInteraction({
+        productId: ids[0] || 'checkout',
+        action: 'checkout',
+        timestamp,
+      });
+
+      onCheckoutRequest?.(event);
+      mergedConfig.onCheckoutRequest?.(event);
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('glowguide:checkout-request', {
+            detail: event,
+            bubbles: true,
+          }),
+        );
+      }
+    },
+    [addedProductIds, sessionId, onCheckoutRequest, mergedConfig],
+  );
+
   const resetSession = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -280,6 +397,8 @@ export function WidgetProvider({
     setAnalysisResult(null);
     setAnalysisError(null);
     setRecommendations([]);
+    setAddedProductIds([]);
+    setCartInteraction(null);
     setSessionId(generateSessionId());
     setCurrentStep('welcome');
     setConsentGiven(false);
@@ -328,6 +447,8 @@ export function WidgetProvider({
       analysisResult,
       analysisError,
       recommendations,
+      cartInteraction,
+      addedProductIds,
     }),
     [
       sessionId,
@@ -341,6 +462,8 @@ export function WidgetProvider({
       analysisResult,
       analysisError,
       recommendations,
+      cartInteraction,
+      addedProductIds,
     ],
   );
 
@@ -352,6 +475,8 @@ export function WidgetProvider({
       currentStep,
       config: mergedConfig,
       recommendations,
+      addedProductIds,
+      cartInteraction,
       openWidget,
       closeWidget,
       toggleWidget,
@@ -368,6 +493,9 @@ export function WidgetProvider({
       startAnalysis,
       cancelAnalysis,
       resetAnalysis,
+      addToCart,
+      addAllToCart,
+      requestCheckout,
     }),
     [
       isOpen,
@@ -376,6 +504,8 @@ export function WidgetProvider({
       currentStep,
       mergedConfig,
       recommendations,
+      addedProductIds,
+      cartInteraction,
       openWidget,
       closeWidget,
       toggleWidget,
@@ -392,6 +522,9 @@ export function WidgetProvider({
       startAnalysis,
       cancelAnalysis,
       resetAnalysis,
+      addToCart,
+      addAllToCart,
+      requestCheckout,
     ],
   );
 
