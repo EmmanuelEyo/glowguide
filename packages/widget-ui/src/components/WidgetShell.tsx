@@ -5,6 +5,7 @@ import { WidgetProgress } from './WidgetProgress';
 import { WelcomeStep } from './steps/WelcomeStep';
 import { ConsentStep } from './steps/ConsentStep';
 import { CameraCaptureStep } from './steps/CameraCaptureStep';
+import { AnalyzingStep } from './steps/AnalyzingStep';
 import { useWidget } from '../context/WidgetContext';
 import type { SessionStepId } from '../types/widget';
 
@@ -31,6 +32,16 @@ const STEP_METADATA: Record<
   capture: {
     title: 'Skin Capture',
     badge: 'Step 3 of 3',
+    index: 2,
+  },
+  analyzing: {
+    title: 'Skin Analysis',
+    badge: 'Evaluating',
+    index: 2,
+  },
+  report: {
+    title: 'Skin Report',
+    badge: 'Results',
     index: 2,
   },
 };
@@ -61,6 +72,7 @@ export function WidgetShell({
         {currentStep === 'welcome' && <WelcomeStep />}
         {currentStep === 'consent' && <ConsentStep />}
         {currentStep === 'capture' && <CameraCaptureStep />}
+        {(currentStep === 'analyzing' || currentStep === 'report') && <AnalyzingStep />}
       </div>
     </div>
   );

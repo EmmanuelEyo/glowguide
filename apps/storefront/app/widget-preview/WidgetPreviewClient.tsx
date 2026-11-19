@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { WidgetProvider, InlineWidget, useWidget } from '@glowguide/widget-ui';
+import {
+  WidgetProvider,
+  InlineWidget,
+  useWidget,
+  SCENARIO_KEYS,
+  MOCK_SCENARIOS,
+} from '@glowguide/widget-ui';
 import type { SessionStepId } from '@glowguide/widget-ui';
 
 function SessionInspector() {
@@ -13,8 +19,12 @@ function SessionInspector() {
     setCameraState,
     setCameraError,
     clearCameraError,
+    startAnalysis,
+    cancelAnalysis,
+    resetAnalysis,
   } = useWidget();
   const [copied, setCopied] = useState(false);
+  const [selectedScenario, setSelectedScenario] = useState<string>('auto');
 
   const handleCopySessionId = async () => {
     try {
@@ -32,9 +42,10 @@ function SessionInspector() {
     { id: 'welcome', label: 'Welcome', number: 1 },
     { id: 'consent', label: 'Consent', number: 2 },
     { id: 'capture', label: 'Capture', number: 3 },
+    { id: 'analyzing', label: 'Analysis', number: 4 },
   ];
 
-  const handleSimulateError = (
+  const handleSimulateCameraError = (
     code: 'PERMISSION_DENIED' | 'CAMERA_IN_USE' | 'NO_CAMERA_FOUND' | 'DISCONNECTED',
     message: string,
   ) => {
@@ -43,9 +54,14 @@ function SessionInspector() {
     setCameraError({ code, message });
   };
 
-  const handleClearError = () => {
+  const handleClearCameraError = () => {
     clearCameraError();
     setCameraState('idle');
+  };
+
+  const handleTriggerAnalysis = () => {
+    const override = selectedScenario === 'auto' ? undefined : selectedScenario;
+    startAnalysis(override);
   };
 
   return (
@@ -89,7 +105,7 @@ function SessionInspector() {
         {/* Current Step */}
         <div>
           <span className="block text-xs text-luma-secondary mb-2">Current Step</span>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-1.5">
             {steps.map((s) => {
               const isActive = currentStep === s.id;
               return (
@@ -97,15 +113,18 @@ function SessionInspector() {
                   key={s.id}
                   type="button"
                   onClick={() => setStep(s.id)}
-                  className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg text-xs font-medium border transition-colors ${isActive
+                  className={`flex flex-col items-center justify-center py-2 px-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                    isActive
                       ? 'bg-luma-accent text-luma-inverse border-luma-accent shadow-sm'
                       : 'bg-luma-subtle text-luma-secondary border-luma-border hover:bg-luma-card'
-                    }`}
+                  }`}
                 >
-                  <span className="text-[0.625rem] opacity-80 uppercase tracking-wider">
+                  <span className="text-[0.5625rem] opacity-80 uppercase tracking-wider">
                     Step {s.number}
                   </span>
-                  <span className="font-semibold mt-0.5">{s.label}</span>
+                  <span className="font-semibold text-[0.6875rem] mt-0.5 truncate w-full text-center">
+                    {s.label}
+                  </span>
                 </button>
               );
             })}
@@ -113,15 +132,16 @@ function SessionInspector() {
         </div>
 
         {/* Consent & Camera Status */}
-        <div className="grid grid-cols-2 gap-3 pt-2">
+        <div className="grid grid-cols-2 gap-3 pt-1">
           <div className="bg-luma-subtle p-3 rounded-xl border border-luma-border">
             <span className="block text-[0.6875rem] uppercase tracking-wider text-luma-ghost mb-1">
               Consent Status
             </span>
             <div className="flex items-center gap-2">
               <span
-                className={`w-2 h-2 rounded-full ${session.consentGiven ? 'bg-emerald-500' : 'bg-amber-500'
-                  }`}
+                className={`w-2 h-2 rounded-full ${
+                  session.consentGiven ? 'bg-emerald-500' : 'bg-amber-500'
+                }`}
               />
               <span className="text-xs font-semibold text-luma-ink">
                 {session.consentGiven ? 'Agreed' : 'Pending'}
@@ -134,13 +154,118 @@ function SessionInspector() {
               Camera State
             </span>
             <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${session.cameraState === 'active' ? 'bg-emerald-500': session.cameraState === 'error' || session.cameraState === 'denied' ? 'bg-red-500' : 'bg-zinc-400'}`} />
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  session.cameraState === 'active'
+                    ? 'bg-emerald-500'
+                    : session.cameraState === 'error' || session.cameraState === 'denied'
+                    ? 'bg-red-500'
+                    : 'bg-zinc-400'
+                }`}
+              />
               <span className="text-xs font-semibold text-luma-ink capitalize">
                 {session.cameraState}
               </span>
             </div>
           </div>
         </div>
+
+        {/* Analysis Engine Status */}
+        <div className="bg-luma-subtle p-3 rounded-xl border border-luma-border">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[0.6875rem] uppercase tracking-wider text-luma-ghost">
+              Skin Analysis Service
+            </span>
+            <span
+              className={`text-[0.625rem] px-2 py-0.5 rounded font-mono font-medium uppercase tracking-wider ${
+                session.processingStatus === 'done'
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                  : session.processingStatus === 'loading'
+                  ? 'bg-amber-50 text-amber-800 border border-amber-200 animate-pulse'
+                  : session.processingStatus === 'error'
+                  ? 'bg-red-50 text-red-800 border border-red-200'
+                  : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+              }`}
+            >
+              {session.processingStatus}
+            </span>
+          </div>
+
+          {/* Scenario override selector */}
+          <div className="mb-3">
+            <label
+              htmlFor="scenario-select"
+              className="block text-[0.625rem] uppercase tracking-wider text-luma-secondary mb-1"
+            >
+              Scenario Preset:
+            </label>
+            <select
+              id="scenario-select"
+              value={selectedScenario}
+              onChange={(e) => setSelectedScenario(e.target.value)}
+              className="w-full text-xs bg-luma-surface border border-luma-border rounded-lg px-2.5 py-1.5 text-luma-ink focus:outline-none focus:ring-1 focus:ring-luma-accent"
+            >
+              <option value="auto">Auto (Deterministic Hash)</option>
+              {SCENARIO_KEYS.map((k) => (
+                <option key={k} value={k}>
+                  {MOCK_SCENARIOS[k]?.name || k} ({k})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Analysis trigger actions */}
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={handleTriggerAnalysis}
+              disabled={session.processingStatus === 'loading'}
+              className="flex-1 text-[0.625rem] px-2 py-1.5 rounded border border-luma-accent/40 bg-luma-accent/10 hover:bg-luma-accent/20 text-luma-accent font-medium uppercase tracking-wider transition-colors disabled:opacity-50"
+            >
+              Run Analysis
+            </button>
+
+            {session.processingStatus === 'loading' ? (
+              <button
+                type="button"
+                onClick={cancelAnalysis}
+                className="text-[0.625rem] px-2.5 py-1.5 rounded border border-red-300 bg-red-50 hover:bg-red-100 text-red-800 font-medium uppercase tracking-wider transition-colors"
+              >
+                Cancel
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={resetAnalysis}
+                className="text-[0.625rem] px-2.5 py-1.5 rounded border border-luma-border bg-luma-surface hover:bg-luma-card text-luma-secondary font-medium uppercase tracking-wider transition-colors"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Analysis Result Summary if done */}
+        {session.analysisResult && (
+          <div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/70">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[0.6875rem] uppercase tracking-wider text-emerald-800 font-semibold">
+                Result: {session.analysisResult.scenarioId}
+              </span>
+              <span className="text-[0.625rem] text-emerald-700 font-mono">
+                {session.analysisResult.observations.length} Metrics
+              </span>
+            </div>
+            <div className="space-y-1">
+              {session.analysisResult.observations.map((obs) => (
+                <div key={obs.label} className="text-[0.6875rem] flex items-center justify-between">
+                  <span className="text-emerald-950 font-medium">{obs.label}:</span>
+                  <span className="text-emerald-800">{obs.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Captured Image Inspector */}
         <div className="bg-luma-subtle p-3 rounded-xl border border-luma-border">
@@ -185,7 +310,7 @@ function SessionInspector() {
               </span>
               <button
                 type="button"
-                onClick={handleClearError}
+                onClick={handleClearCameraError}
                 className="text-[0.625rem] text-amber-700 hover:underline font-mono"
               >
                 Clear
@@ -199,7 +324,7 @@ function SessionInspector() {
         {/* Error Simulation Controls */}
         <div className="bg-luma-subtle p-3 rounded-xl border border-luma-border">
           <span className="block text-[0.6875rem] uppercase tracking-wider text-luma-ghost mb-2">
-            Simulate Camera Error
+            Simulate Camera Failure
           </span>
           <div className="flex flex-wrap gap-1.5">
             {[
@@ -212,7 +337,7 @@ function SessionInspector() {
                 key={code}
                 type="button"
                 onClick={() =>
-                  handleSimulateError(
+                  handleSimulateCameraError(
                     code as 'PERMISSION_DENIED' | 'CAMERA_IN_USE' | 'NO_CAMERA_FOUND' | 'DISCONNECTED',
                     msg,
                   )
@@ -233,7 +358,7 @@ function SessionInspector() {
               <strong className="text-luma-ink font-medium block mb-0.5">
                 Privacy Architecture
               </strong>
-              Biometric permissions and session state live strictly in React memory for the active visit. No camera frames or consent markers are written to cookies, local storage, or remote servers.
+              Biometric permissions, photos, and analysis calculations live strictly in React memory for the active visit. Zero frames or biometric markers are stored or transmitted remotely.
             </div>
           </div>
         </div>

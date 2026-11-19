@@ -2,7 +2,12 @@ export type WidgetMode = 'floating' | 'inline';
 export type WidgetTheme = 'light' | 'dark' | string;
 export type LauncherPosition = 'bottom-right' | 'bottom-left' | string;
 
-export type SessionStepId = 'welcome' | 'consent' | 'capture';
+export type SessionStepId =
+  | 'welcome'
+  | 'consent'
+  | 'capture'
+  | 'analyzing'
+  | 'report';
 export type CameraState = 'idle' | 'active' | 'error' | 'denied';
 
 export type CameraErrorCode =
@@ -16,6 +21,41 @@ export type CameraErrorCode =
 export interface CameraErrorEvent {
   code: CameraErrorCode;
   message: string;
+}
+
+export interface Observation {
+  label: string;
+  value: string;
+  note: string;
+}
+
+export interface AnalysisResult {
+  scenarioId: string;
+  observations: Observation[];
+  generatedAt: string;
+}
+
+export type ProcessingStatus = 'idle' | 'loading' | 'done' | 'error';
+
+export type AnalysisErrorCode =
+  | 'TIMEOUT'
+  | 'IMAGE_UNREADABLE'
+  | 'SERVICE_UNAVAILABLE'
+  | 'UNKNOWN';
+
+export interface AnalysisError {
+  code: AnalysisErrorCode;
+  message: string;
+}
+
+export interface ScanStartedEvent {
+  sessionId: string;
+  timestamp: string;
+}
+
+export interface ScanCompleteEvent {
+  sessionId: string;
+  result: AnalysisResult;
 }
 
 export interface WidgetConfig {
@@ -43,6 +83,9 @@ export interface SessionState {
   cameraState: CameraState;
   capturedImageUrl: string | null;
   cameraError: CameraErrorEvent | null;
+  processingStatus: ProcessingStatus;
+  analysisResult: AnalysisResult | null;
+  analysisError: AnalysisError | null;
 }
 
 export interface ConsentGivenEvent {
@@ -69,4 +112,7 @@ export interface WidgetContextValue {
   clearCapturedImage: () => void;
   setCameraError: (error: CameraErrorEvent | null) => void;
   clearCameraError: () => void;
+  startAnalysis: (scenarioOverride?: string) => Promise<AnalysisResult | null>;
+  cancelAnalysis: () => void;
+  resetAnalysis: () => void;
 }

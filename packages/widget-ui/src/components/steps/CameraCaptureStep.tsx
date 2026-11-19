@@ -7,7 +7,17 @@ import { processImageFile } from '../../utils/imageUpload';
 import { CameraErrorRecovery } from '../camera/CameraErrorRecovery';
 
 export function CameraCaptureStep() {
-  const { isOpen, session, prevStep, setCameraState, setCameraError, clearCameraError, setCapturedImage, clearCapturedImage, } = useWidget();
+  const {
+    isOpen,
+    session,
+    prevStep,
+    setCameraState,
+    setCameraError,
+    clearCameraError,
+    setCapturedImage,
+    clearCapturedImage,
+    startAnalysis,
+  } = useWidget();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -144,6 +154,7 @@ export function CameraCaptureStep() {
         <div className="w-full max-w-[340px] flex flex-col gap-3">
           <button
             type="button"
+            onClick={() => startAnalysis()}
             className="w-full h-11 px-6 rounded-[3px] bg-luma-accent hover:bg-luma-accent-dark text-luma-inverse text-xs font-medium tracking-[0.1em] uppercase transition-colors flex items-center justify-center gap-2"
           >
             <span>✦</span> Use This Photo

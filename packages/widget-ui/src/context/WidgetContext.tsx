@@ -6,19 +6,26 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import type {
+  AnalysisError,
+  AnalysisResult,
   CameraErrorCode,
   CameraErrorEvent,
   CameraState,
   ConsentGivenEvent,
+  ProcessingStatus,
+  ScanCompleteEvent,
+  ScanStartedEvent,
   SessionState,
   SessionStepId,
   WidgetConfig,
   WidgetContextValue,
   WidgetMode,
 } from '../types/widget';
+import { analyzeSkin } from '../services/skinAnalysis';
 
 const DEFAULT_CONFIG: WidgetConfig = {
   storeId: 'luma-beauty',
@@ -30,7 +37,13 @@ const DEFAULT_CONFIG: WidgetConfig = {
   autoOpen: false,
 };
 
-const STEP_ORDER: SessionStepId[] = ['welcome', 'consent', 'capture'];
+const STEP_ORDER: SessionStepId[] = [
+  'welcome',
+  'consent',
+  'capture',
+  'analyzing',
+  'report',
+];
 
 function generateSessionId(): string {
   return 'sess_' + Math.random().toString(36).substring(2, 11);
@@ -51,6 +64,8 @@ interface WidgetProviderProps {
   config?: Partial<WidgetConfig>;
   onConsentGiven?: (event: ConsentGivenEvent) => void;
   onCameraError?: (event: CameraErrorEvent) => void;
+  onScanStarted?: (event: ScanStartedEvent) => void;
+  onScanComplete?: (event: ScanCompleteEvent) => void;
 }
 
 export function WidgetProvider({
@@ -58,6 +73,8 @@ export function WidgetProvider({
   config: userConfig,
   onConsentGiven,
   onCameraError,
+  onScanStarted,
+  onScanComplete,
 }: WidgetProviderProps) {
   const mergedConfig = useMemo(
     () => ({ ...DEFAULT_CONFIG, ...userConfig }),
@@ -73,11 +90,34 @@ export function WidgetProvider({
   const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
   const [cameraError, setCameraErrorState] = useState<CameraErrorEvent | null>(null);
 
+  const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>('idle');
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [analysisError, setAnalysisError] = useState<AnalysisError | null>(null);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const mode: WidgetMode = mergedConfig.mode ?? 'floating';
 
   const openWidget = useCallback(() => setIsOpen(true), []);
-  const closeWidget = useCallback(() => setIsOpen(false), []);
-  const toggleWidget = useCallback(() => setIsOpen((prev) => !prev), []);
+
+  const closeWidget = useCallback(() => {
+    setIsOpen(false);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
+
+  const toggleWidget = useCallback(() => {
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (!next && abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      return next;
+    });
+  }, []);
 
   const setStep = useCallback((step: SessionStepId) => {
     setCurrentStep(step);
@@ -151,7 +191,75 @@ export function WidgetProvider({
     setCameraErrorState(null);
   }, []);
 
+  const cancelAnalysis = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setProcessingStatus('idle');
+    setAnalysisError(null);
+    setCurrentStep('capture');
+  }, []);
+
+  const resetAnalysis = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setProcessingStatus('idle');
+    setAnalysisResult(null);
+    setAnalysisError(null);
+  }, []);
+
+  const startAnalysis = useCallback(
+    async (scenarioOverride?: string): Promise<AnalysisResult | null> => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      setProcessingStatus('loading');
+      setAnalysisError(null);
+      setAnalysisResult(null);
+      setCurrentStep('analyzing');
+
+      const timestamp = new Date().toISOString();
+      onScanStarted?.({ sessionId, timestamp });
+
+      try {
+        const result = await analyzeSkin({
+          imageUrl: capturedImageUrl || sessionId,
+          scenarioOverride,
+          signal: controller.signal,
+        });
+
+        setAnalysisResult(result);
+        setProcessingStatus('done');
+        onScanComplete?.({ sessionId, result });
+        return result;
+      } catch (err: unknown) {
+        if (controller.signal.aborted) {
+          return null;
+        }
+        const analysisErr = err as AnalysisError;
+        setAnalysisError(analysisErr);
+        setProcessingStatus('error');
+        return null;
+      } finally {
+        if (abortControllerRef.current === controller) {
+          abortControllerRef.current = null;
+        }
+      }
+    },
+    [sessionId, capturedImageUrl, onScanStarted, onScanComplete],
+  );
+
   const resetSession = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     setCapturedImageUrl((prev) => {
       if (prev && prev.startsWith('blob:')) {
         URL.revokeObjectURL(prev);
@@ -160,15 +268,21 @@ export function WidgetProvider({
     });
     setCameraStateState('idle');
     setCameraErrorState(null);
+    setProcessingStatus('idle');
+    setAnalysisResult(null);
+    setAnalysisError(null);
     setSessionId(generateSessionId());
     setCurrentStep('welcome');
     setConsentGiven(false);
     setConsentTimestamp(null);
   }, []);
 
-  // Cleanup object URL on unmount of provider
+  // Cleanup object URL and pending controllers on unmount of provider
   useEffect(() => {
     return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
       if (capturedImageUrl && capturedImageUrl.startsWith('blob:')) {
         URL.revokeObjectURL(capturedImageUrl);
       }
@@ -201,6 +315,9 @@ export function WidgetProvider({
       cameraState,
       capturedImageUrl,
       cameraError,
+      processingStatus,
+      analysisResult,
+      analysisError,
     }),
     [
       sessionId,
@@ -210,6 +327,9 @@ export function WidgetProvider({
       cameraState,
       capturedImageUrl,
       cameraError,
+      processingStatus,
+      analysisResult,
+      analysisError,
     ],
   );
 
@@ -233,6 +353,9 @@ export function WidgetProvider({
       clearCapturedImage,
       setCameraError,
       clearCameraError,
+      startAnalysis,
+      cancelAnalysis,
+      resetAnalysis,
     }),
     [
       isOpen,
@@ -253,6 +376,9 @@ export function WidgetProvider({
       clearCapturedImage,
       setCameraError,
       clearCameraError,
+      startAnalysis,
+      cancelAnalysis,
+      resetAnalysis,
     ],
   );
 

@@ -6,6 +6,8 @@ import { InlineWidget } from './InlineWidget';
 import type {
   CameraErrorEvent,
   ConsentGivenEvent,
+  ScanCompleteEvent,
+  ScanStartedEvent,
   WidgetConfig,
   WidgetMode,
 } from '../types/widget';
@@ -32,6 +34,8 @@ export interface GlowGuideWidgetProps {
   className?: string;
   onConsentGiven?: (event: ConsentGivenEvent) => void;
   onCameraError?: (event: CameraErrorEvent) => void;
+  onScanStarted?: (event: ScanStartedEvent) => void;
+  onScanComplete?: (event: ScanCompleteEvent) => void;
   children?: React.ReactNode;
 }
 
@@ -41,6 +45,8 @@ export function GlowGuideWidget({
   className,
   onConsentGiven,
   onCameraError,
+  onScanStarted,
+  onScanComplete,
   children,
 }: GlowGuideWidgetProps) {
   const mergedConfig: Partial<WidgetConfig> = {
@@ -49,7 +55,13 @@ export function GlowGuideWidget({
   };
 
   return (
-    <WidgetProvider config={mergedConfig} onConsentGiven={onConsentGiven} onCameraError={onCameraError}>
+    <WidgetProvider
+      config={mergedConfig}
+      onConsentGiven={onConsentGiven}
+      onCameraError={onCameraError}
+      onScanStarted={onScanStarted}
+      onScanComplete={onScanComplete}
+    >
       <GlowGuideWidgetInner modeOverride={mode} className={className} />
       {children}
     </WidgetProvider>
