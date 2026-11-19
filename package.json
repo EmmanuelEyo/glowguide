@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "pnpm --filter @glowguide/storefront dev",
     "build:storefront": "pnpm --filter @glowguide/storefront build",
-    "start:storefront": "pnpm --filter @glowguide/storefront start"
+    "start:storefront": "pnpm --filter @glowguide/storefront start",
+    "build:sdk": "pnpm --filter @glowguide/widget-sdk build"
   },
   "keywords": [],
   "author": "",

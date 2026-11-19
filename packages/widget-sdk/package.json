@@ -1,0 +1,31 @@
+{
+  "name": "@glowguide/widget-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/glowguide.umd.js",
+  "module": "./dist/glowguide.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/glowguide.es.js",
+      "require": "./dist/glowguide.umd.js",
+      "default": "./dist/glowguide.es.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@glowguide/widget-ui": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vite": "^6.2.0"
+  }
+}
