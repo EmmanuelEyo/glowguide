@@ -1,12 +1,14 @@
 import type {
   GlowGuideConfig,
   GlowGuideInstance,
+  MountHandle,
   SDKEventMap,
   SDKLifecycleState,
   SDKState,
 } from './types';
 import { normalizeConfig, validateConfig } from './config';
 import { EventEmitter } from './events';
+import { mountWidget } from './mount';
 
 export const SDK_VERSION = '0.1.0';
 
@@ -21,6 +23,8 @@ export class GlowGuideSDK implements GlowGuideInstance {
   private _sessionId: string | null = null;
   private _events: EventEmitter = new EventEmitter();
   private _cleanupFns: Array<() => void> = [];
+  private _mountHandle: MountHandle | null = null;
+  private _mountContainer: HTMLElement | null = null;
 
   constructor(config?: GlowGuideConfig) {
     if (config) {
@@ -43,6 +47,10 @@ export class GlowGuideSDK implements GlowGuideInstance {
       throw new Error('GlowGuide SDK Error: SDK has not been configured yet. Call init() first.');
     }
     return this._config;
+  }
+
+  get mountContainer(): HTMLElement | null {
+    return this._mountContainer;
   }
 
   async init(rawConfig?: GlowGuideConfig): Promise<GlowGuideInstance> {
@@ -85,11 +93,78 @@ export class GlowGuideSDK implements GlowGuideInstance {
       timestamp,
     });
 
+    // Auto-mount by default unless explicitly disabled or in non-DOM environment
+    if (typeof window !== 'undefined' && this._config.autoMount !== false) {
+      await this.mount();
+    }
+
     if (this._config.autoOpen) {
       this.open();
     }
 
     return this;
+  }
+
+  async mount(target?: HTMLElement | string): Promise<GlowGuideInstance> {
+    this.assertNotDestroyed();
+    this.assertInitialized();
+
+    if (this._lifecycleState === 'mounted') {
+      console.warn('GlowGuide SDK: Widget is already mounted. Call unmount() first to remount.');
+      return this;
+    }
+
+    const targetCandidate = target || this.config.container;
+    this._mountHandle = mountWidget({
+      config: this.config,
+      target: targetCandidate,
+      onEvent: (event, data) => {
+        this._events.emit(event, data);
+        if (event === 'opened') {
+          this._isOpen = true;
+        } else if (event === 'closed') {
+          this._isOpen = false;
+        }
+      },
+    });
+
+    this._mountContainer = this._mountHandle.container;
+    const previousState = this._lifecycleState;
+    this._lifecycleState = 'mounted';
+
+    const timestamp = new Date().toISOString();
+    this._events.emit('mounted', {
+      container: this._mountContainer,
+      mode: this.config.mode || 'floating',
+      timestamp,
+    });
+    this._events.emit('state-change', {
+      previous: previousState,
+      current: 'mounted',
+    });
+
+    return this;
+  }
+
+  unmount(): void {
+    if (this._lifecycleState !== 'mounted' || !this._mountHandle) {
+      return;
+    }
+
+    this._mountHandle.unmount();
+    this._mountHandle = null;
+    this._mountContainer = null;
+    this._isOpen = false;
+
+    const previousState = this._lifecycleState;
+    this._lifecycleState = 'ready';
+
+    const timestamp = new Date().toISOString();
+    this._events.emit('unmounted', { timestamp });
+    this._events.emit('state-change', {
+      previous: previousState,
+      current: 'ready',
+    });
   }
 
   open(): void {
@@ -100,6 +175,10 @@ export class GlowGuideSDK implements GlowGuideInstance {
 
     this._isOpen = true;
     const timestamp = new Date().toISOString();
+
+    if (this._mountHandle) {
+      this._mountHandle.open();
+    }
 
     this._events.emit('opened', { timestamp });
 
@@ -122,6 +201,10 @@ export class GlowGuideSDK implements GlowGuideInstance {
     this._isOpen = false;
     const timestamp = new Date().toISOString();
 
+    if (this._mountHandle) {
+      this._mountHandle.close();
+    }
+
     this._events.emit('closed', { timestamp });
 
     if (typeof window !== 'undefined') {
@@ -135,7 +218,9 @@ export class GlowGuideSDK implements GlowGuideInstance {
   }
 
   toggle(): void {
-    if (this._isOpen) {
+    if (this._mountHandle) {
+      this._mountHandle.toggle();
+    } else if (this._isOpen) {
       this.close();
     } else {
       this.open();
@@ -144,6 +229,10 @@ export class GlowGuideSDK implements GlowGuideInstance {
 
   destroy(): void {
     if (this._lifecycleState === 'destroyed') return;
+
+    if (this._lifecycleState === 'mounted') {
+      this.unmount();
+    }
 
     const previousState = this._lifecycleState;
 
@@ -180,6 +269,7 @@ export class GlowGuideSDK implements GlowGuideInstance {
       isOpen: this._isOpen,
       config: this._config || ({} as Readonly<GlowGuideConfig>),
       sessionId: this._sessionId,
+      mountContainer: this._mountContainer,
       version: SDK_VERSION,
     };
   }

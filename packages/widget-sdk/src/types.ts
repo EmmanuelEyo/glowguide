@@ -25,6 +25,7 @@ export interface GlowGuideConfig {
   launcherPosition?: LauncherPosition;
   container?: HTMLElement | string | null;
   autoOpen?: boolean;
+  autoMount?: boolean;
   products?: Product[];
   onAddToCart?: (event: AddToCartEvent) => void;
   onCheckoutRequest?: (event: CheckoutRequestEvent) => void;
@@ -37,11 +38,14 @@ export interface SDKState {
   isOpen: boolean;
   config: Readonly<GlowGuideConfig>;
   sessionId: string | null;
+  mountContainer: HTMLElement | null;
   version: string;
 }
 
 export interface SDKEventMap {
   'ready': { instance: GlowGuideInstance; timestamp: string };
+  'mounted': { container: HTMLElement; mode: WidgetMode; timestamp: string };
+  'unmounted': { timestamp: string };
   'opened': { timestamp: string };
   'closed': { timestamp: string };
   'destroyed': { timestamp: string };
@@ -54,11 +58,28 @@ export interface SDKEventMap {
   'camera-error': CameraErrorEvent;
 }
 
+export interface MountOptions {
+  config: Readonly<GlowGuideConfig>;
+  target?: HTMLElement | string | null;
+  onEvent?: <K extends keyof SDKEventMap>(event: K, data: SDKEventMap[K]) => void;
+}
+
+export interface MountHandle {
+  container: HTMLElement;
+  unmount: () => void;
+  open: () => void;
+  close: () => void;
+  toggle: () => void;
+}
+
 export interface GlowGuideInstance {
   readonly lifecycleState: SDKLifecycleState;
   readonly isOpen: boolean;
   readonly config: Readonly<GlowGuideConfig>;
+  readonly mountContainer: HTMLElement | null;
   init(config?: GlowGuideConfig): Promise<GlowGuideInstance>;
+  mount(target?: HTMLElement | string): Promise<GlowGuideInstance>;
+  unmount(): void;
   open(): void;
   close(): void;
   toggle(): void;

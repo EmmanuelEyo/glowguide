@@ -22,9 +22,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@glowguide/widget-ui": "workspace:*"
+    "@glowguide/widget-ui": "workspace:*",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "typescript": "^5",
     "vite": "^6.2.0"
   }
