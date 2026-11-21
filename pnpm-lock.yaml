@@ -234,6 +234,12 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  examples/vanilla-storefront:
+    devDependencies:
+      vite:
+        specifier: ^6.2.0
+        version: 6.4.6(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.33.0)
+
   packages/widget-sdk:
     dependencies:
       '@glowguide/widget-ui':

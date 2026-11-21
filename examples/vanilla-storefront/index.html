@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura Botanicals | Botanical Science for Radiant Skin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css" />
+  <!-- GlowGuide Browser SDK UMD Bundle -->
+  <script src="/glowguide.umd.js"></script>
+</head>
+<body>
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    <div class="container announcement-content">
+      <span>✦ Complimentary botanical travel routine on orders over £60</span>
+      <span class="announcement-badge">GlowGuide SDK Integration Demo</span>
+    </div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="container header-container">
+      <div class="header-left">
+        <a href="#" class="brand-logo">
+          <span class="brand-leaf">✦</span>
+          <span class="brand-title">AURA BOTANICALS</span>
+        </a>
+      </div>
+
+      <nav class="main-nav">
+        <a href="#catalogue-section">Skincare</a>
+        <a href="#discovery-section">Routine Discovery</a>
+        <a href="#about-section">Our Philosophy</a>
+        <a href="#sustainability-section">Sustainability</a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Inspector Toggle Button -->
+        <button id="btn-toggle-inspector" class="btn-inspector-trigger" title="Open Developer Integration Inspector">
+          <span class="pulse-dot"></span>
+          <span>SDK Inspector</span>
+        </button>
+
+        <!-- Cart Bag Trigger -->
+        <button id="btn-open-cart" class="btn-cart-trigger" aria-label="Open Shopping Bag">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span class="cart-label">Bag</span>
+          <span id="cart-count-badge" class="cart-badge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Banner Section -->
+    <section class="hero-section">
+      <div class="container hero-container">
+        <div class="hero-copy">
+          <div class="hero-tag">
+            <span class="hero-tag-leaf">🌿</span>
+            <span>Cellular Plant Science</span>
+          </div>
+          <h1 class="hero-title">
+            Pure Botanicals, Tailored to Your Skin Barrier
+          </h1>
+          <p class="hero-lead">
+            Experience precision botanical skincare formulated with cold-pressed plant actives and zero synthetic fillers. Discover your custom routine with our interactive diagnostic advisor.
+          </p>
+          <div class="hero-buttons">
+            <button id="hero-btn-quiz" data-open-widget class="btn-primary">
+              <span>✦</span> Start Skin Diagnostic
+            </button>
+            <a href="#discovery-section" class="btn-outline">
+              Explore Inline Discovery
+            </a>
+          </div>
+          <p class="hero-privacy-note">
+            🔒 Private, in-memory diagnostic analysis. Zero facial images stored or uploaded.
+          </p>
+        </div>
+
+        <div class="hero-visual">
+          <div class="hero-card">
+            <div class="hero-card-img-wrap">
+              <img
+                src="https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80"
+                alt="Aura Botanicals routine bottles"
+                class="hero-card-img"
+              />
+            </div>
+            <div class="hero-card-floating-badge">
+              <span class="badge-icon">🌿</span>
+              <div class="badge-text">
+                <strong>GlowGuide AI Integration</strong>
+                <span>Shadow DOM Isolated</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Badges Bar -->
+    <section class="trust-bar">
+      <div class="container trust-grid">
+        <div class="trust-item">
+          <span class="trust-icon">🌱</span>
+          <span class="trust-title">100% Organic Plant Extracts</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">🔬</span>
+          <span class="trust-title">Dermatologist Verified</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">🛡️</span>
+          <span class="trust-title">Zero Synthetic Fragrance</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">🐇</span>
+          <span class="trust-title">Cruelty-Free Certified</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Catalogue Section -->
+    <section id="catalogue-section" class="catalogue-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">Botanical Formulations</span>
+          <h2 class="section-title">The Aura Core Collection</h2>
+          <p class="section-subtitle">
+            Targeted botanicals designed to restore moisture balance, support cellular renewal, and fortify the acid mantle.
+          </p>
+        </div>
+
+        <div class="products-grid" id="host-products-grid">
+          <!-- Populated by main.js with botanical catalogue items -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Dedicated Inline Widget Discovery Section -->
+    <section id="discovery-section" class="discovery-section">
+      <div class="container">
+        <div class="discovery-header">
+          <span class="section-eyebrow">Interactive Retail Experience</span>
+          <h2 class="section-title">Embedded Routine Discovery</h2>
+          <p class="section-subtitle">
+            Retailers can mount the GlowGuide widget directly into any layout container with zero framework overhead. Below is the active widget mounted inline inside our host page:
+          </p>
+
+          <div class="mode-toggle-bar">
+            <span class="mode-toggle-label">Demonstration Mode:</span>
+            <button id="btn-mode-inline" class="mode-tab active">Inline Mounted</button>
+            <button id="btn-mode-floating" class="mode-tab">Floating Mode</button>
+          </div>
+        </div>
+
+        <!-- Inline Widget Mount Container -->
+        <div class="inline-mount-wrapper">
+          <div id="glowguide-inline-container" class="inline-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About / Philosophy Section -->
+    <section id="about-section" class="philosophy-section">
+      <div class="container philosophy-grid">
+        <div class="philosophy-copy">
+          <span class="section-eyebrow">Our Formulation Standard</span>
+          <h2 class="section-title">Bio-Compatible Botanicals</h2>
+          <p>
+            Every Aura Botanicals formula is crafted with biomimetic plant lipids, fermented adaptogens, and cold-pressed seed oils. We replace inactive water bases with pure floral hydrosols to deliver maximum potency without disrupting skin microflora.
+          </p>
+          <div class="stats-row">
+            <div class="stat-col">
+              <strong>99.4%</strong>
+              <span>Bio-active ingredients</span>
+            </div>
+            <div class="stat-col">
+              <strong>100%</strong>
+              <span>Recyclable amber glass</span>
+            </div>
+            <div class="stat-col">
+              <strong>0%</strong>
+              <span>Silicones or parabens</span>
+            </div>
+          </div>
+        </div>
+        <div class="philosophy-visual">
+          <img
+            src="https://images.unsplash.com/photo-1608248597359-009c915f0732?auto=format&fit=crop&w=700&q=80"
+            alt="Botanical skincare ingredients"
+            class="philosophy-img"
+          />
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div class="footer-col">
+        <div class="footer-logo">✦ AURA BOTANICALS</div>
+        <p class="footer-desc">
+          Clean cellular botanical skincare designed for natural skin barrier longevity.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Integration Architecture</h4>
+        <ul>
+          <li><a href="#discovery-section">Inline Container Mount</a></li>
+          <li><button type="button" data-open-widget class="text-link">Floating Launcher</button></li>
+          <li><a href="https://github.com/EmmanuelEyo/glowguide" target="_blank" rel="noopener">GitHub Monorepo</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>GlowGuide SDK</h4>
+        <ul>
+          <li>Shadow DOM Style Isolation</li>
+          <li>Typed Custom Events</li>
+          <li>Host Cart Synchronization</li>
+          <li>Privacy-First Camera Processing</li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; 2026 Aura Botanicals. GlowGuide Vanilla JavaScript SDK Demonstration.</p>
+    </div>
+  </footer>
+
+  <!-- Host Shopping Cart Drawer -->
+  <div id="cart-drawer-backdrop" class="drawer-backdrop"></div>
+  <aside id="cart-drawer" class="cart-drawer" aria-labelledby="cart-heading">
+    <div class="drawer-header">
+      <h3 id="cart-heading" class="drawer-title">Shopping Bag (<span id="cart-drawer-count">0</span>)</h3>
+      <button id="btn-close-cart" class="btn-close-drawer" aria-label="Close Shopping Bag">&times;</button>
+    </div>
+
+    <!-- Free shipping progress -->
+    <div class="shipping-progress-wrap">
+      <div class="shipping-progress-text">
+        <span id="shipping-progress-msg">Add £60.00 for complimentary botanical delivery</span>
+      </div>
+      <div class="shipping-progress-track">
+        <div id="shipping-progress-fill" class="shipping-progress-bar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Line Items List -->
+    <div id="cart-items-container" class="drawer-items">
+      <!-- Populated dynamically by main.js -->
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="drawer-footer">
+      <div class="drawer-summary-row">
+        <span>Subtotal</span>
+        <span id="cart-subtotal" class="drawer-total-price">£0.00</span>
+      </div>
+      <p class="drawer-note">Taxes and carbon-neutral shipping calculated at checkout.</p>
+      <button id="btn-checkout" class="btn-checkout" disabled>Proceed to Checkout</button>
+      <button id="btn-clear-cart" class="btn-clear-cart">Clear Bag</button>
+    </div>
+  </aside>
+
+  <!-- Checkout Confirmation Dialog -->
+  <div id="checkout-modal-backdrop" class="modal-backdrop"></div>
+  <div id="checkout-modal" class="checkout-modal" role="dialog" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-icon">🌿</div>
+      <h3 id="modal-title" class="modal-title">Simulated Checkout Requested</h3>
+      <p id="modal-desc" class="modal-desc">
+        The GlowGuide SDK dispatched a <code class="code-badge">checkout-request</code> event to the Aura Botanicals storefront.
+      </p>
+      <div id="modal-items-summary" class="modal-items-box"></div>
+      <div class="modal-actions">
+        <button id="btn-close-modal" class="btn-primary full-width">Continue Exploring</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Developer Integration Inspector Panel -->
+  <aside id="inspector-panel" class="inspector-drawer">
+    <div class="inspector-header">
+      <div class="inspector-title-wrap">
+        <span class="inspector-badge">SDK Inspector</span>
+        <h3 class="inspector-title">Host Storefront Telemetry</h3>
+      </div>
+      <button id="btn-close-inspector" class="btn-close-drawer" aria-label="Close Inspector">&times;</button>
+    </div>
+
+    <div class="inspector-body">
+      <!-- Status Badges -->
+      <div class="inspector-status-grid">
+        <div class="status-box">
+          <span class="status-box-label">GlowGuide SDK</span>
+          <span id="inspector-sdk-status" class="status-box-val status-green">Ready (v0.1.0)</span>
+        </div>
+        <div class="status-box">
+          <span class="status-box-label">Active Presentation</span>
+          <span id="inspector-mode-status" class="status-box-val">Inline</span>
+        </div>
+        <div class="status-box">
+          <span class="status-box-label">Merchant Accent</span>
+          <span class="status-box-val font-mono">#2D6A4F</span>
+        </div>
+        <div class="status-box">
+          <span class="status-box-label">Events Captured</span>
+          <span id="inspector-events-count" class="status-box-val">0</span>
+        </div>
+      </div>
+
+      <!-- Quick Mode Switcher in Inspector -->
+      <div class="inspector-section">
+        <h4 class="inspector-section-title">Presentation Mode Control</h4>
+        <div class="inspector-btn-group">
+          <button id="insp-btn-floating" class="insp-btn">✦ Open Floating Widget</button>
+          <button id="insp-btn-inline" class="insp-btn">✦ Scroll to Inline Widget</button>
+        </div>
+      </div>
+
+      <!-- Copyable Embed Snippet -->
+      <div class="inspector-section">
+        <div class="flex-between">
+          <h4 class="inspector-section-title">Integration Code Snippet</h4>
+          <button id="btn-copy-snippet" class="btn-copy-mini">Copy Snippet</button>
+        </div>
+        <pre class="code-snippet-box"><code>&lt;!-- 1. Load GlowGuide SDK --&gt;
+&lt;script src="https://cdn.glowguide.io/sdk/v1/glowguide.umd.js"&gt;&lt;/script&gt;
+
+&lt;!-- 2. Initialize with Merchant Branding --&gt;
+&lt;script&gt;
+  const glowGuide = window.GlowGuide.init({
+    storeId: 'aura-botanicals',
+    brandName: 'Aura Botanicals',
+    primaryColor: '#2D6A4F',
+    theme: 'light',
+    mode: 'floating'
+  });
+
+  // 3. Sync recommendations to host cart
+  glowGuide.on('add-to-cart', (evt) => {
+    console.log('Added to bag:', evt.productId);
+  });
+&lt;/script&gt;</code></pre>
+      </div>
+
+      <!-- Real-Time Event Stream -->
+      <div class="inspector-section flex-1">
+        <div class="flex-between mb-1">
+          <h4 class="inspector-section-title">Live Host Event Log</h4>
+          <button id="btn-clear-inspector-events" class="text-btn">Clear Log</button>
+        </div>
+        <div id="inspector-event-list" class="inspector-event-feed">
+          <p class="empty-feed-text">No events dispatched yet. Interact with the widget to stream typed events.</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Application Logic -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
