@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: '/products?category=moisturisers', label: 'Moisturisers' },
   { href: '/products?category=spf', label: 'SPF' },
   { href: '/react-integration', label: 'React Guide' },
+  { href: '/playground', label: 'Playground' },
 ];
 
 export default function Nav() {

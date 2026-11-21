@@ -11,10 +11,10 @@ const FOOTER_LINKS = {
     { href: '/products?category=masks', label: 'Masks' },
   ],
   'GlowGuide': [
+    { href: '/playground', label: 'Developer Playground' },
     { href: '/react-integration', label: 'React / Next.js Guide' },
     { href: '/widget-preview', label: 'Widget Preview' },
     { href: '#', label: 'How It Works' },
-    { href: '#', label: 'For Developers' },
   ],
   Company: [
     { href: '#', label: 'About Luma' },
