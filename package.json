@@ -9,7 +9,8 @@
     "build:storefront": "pnpm --filter @glowguide/storefront build",
     "build:vanilla": "pnpm --filter @glowguide/vanilla-storefront build",
     "start:storefront": "pnpm --filter @glowguide/storefront start",
-    "build:sdk": "pnpm --filter @glowguide/widget-sdk build"
+    "build:sdk": "pnpm --filter @glowguide/widget-sdk build",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,8 @@
   "devDependencies": {
     "@playwright/test": "^1.65.1",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.10.1"
+    "jsdom": "^31.0.1",
+    "prettier": "^3.10.1",
+    "vitest": "^5.1.1"
   }
 }

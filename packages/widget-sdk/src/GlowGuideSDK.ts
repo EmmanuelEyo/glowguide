@@ -5,6 +5,7 @@ import type {
   SDKEventMap,
   SDKLifecycleState,
   SDKState,
+  SessionStepId,
 } from './types';
 import { normalizeConfig, validateConfig } from './config';
 import { EventEmitter } from './events';
@@ -227,6 +228,31 @@ export class GlowGuideSDK implements GlowGuideInstance {
     }
   }
 
+  setStep(step: SessionStepId): void {
+    this.assertNotDestroyed();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('glowguide:command:set-step', {
+          detail: { step },
+          bubbles: true,
+          composed: true,
+        }),
+      );
+    }
+  }
+
+  reset(): void {
+    this.assertNotDestroyed();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('glowguide:command:reset', {
+          bubbles: true,
+          composed: true,
+        }),
+      );
+    }
+  }
+
   destroy(): void {
     if (this._lifecycleState === 'destroyed') return;
 
@@ -308,7 +334,7 @@ export class GlowGuideSDK implements GlowGuideInstance {
   }
 
   private dispatchSdkEvent<K extends keyof SDKEventMap>(event: K, data: SDKEventMap[K]): void {
-    if (this._lifecycleState === 'destroyed') return;
+    if (this._lifecycleState === 'destroyed' && event !== 'destroyed' && event !== 'state-change') return;
 
     // Deduplicate identical events arriving within 25ms (e.g. direct mount bridge + DOM CustomEvent)
     const key = `${String(event)}_${JSON.stringify(data)}`;

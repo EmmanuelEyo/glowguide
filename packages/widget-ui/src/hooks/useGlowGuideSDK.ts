@@ -186,18 +186,21 @@ export function useGlowGuideSDK(
   }, []);
 
   const open = useCallback(() => {
+    setIsOpen(true);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('glowguide:command:open'));
     }
   }, []);
 
   const close = useCallback(() => {
+    setIsOpen(false);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('glowguide:command:close'));
     }
   }, []);
 
   const toggle = useCallback(() => {
+    setIsOpen((prev) => !prev);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('glowguide:command:toggle'));
     }

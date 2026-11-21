@@ -8,6 +8,7 @@ import type {
   RecommendedProduct,
   ScanCompleteEvent,
   ScanStartedEvent,
+  SessionStepId,
   StepChangeEvent,
   WidgetClosedEvent,
   WidgetMode,
@@ -128,6 +129,8 @@ export interface GlowGuideInstance {
   open(): void;
   close(): void;
   toggle(): void;
+  setStep(step: SessionStepId): void;
+  reset(): void;
   destroy(): void;
   getState(): SDKState;
   getConfig(): Readonly<GlowGuideConfig>;
@@ -147,6 +150,7 @@ export type {
   RecommendedProduct,
   ScanCompleteEvent,
   ScanStartedEvent,
+  SessionStepId,
   StepChangeEvent,
   WidgetClosedEvent,
   WidgetMode,

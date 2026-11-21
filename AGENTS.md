@@ -78,7 +78,7 @@ Monorepo root (pnpm workspace). All commands run from `d:\glowguide`.
 - Build: `pnpm build:storefront`
 - Production server: `pnpm start:storefront`
 - Lint: `pnpm --filter @glowguide/storefront lint`
-
-No test runner is configured yet. Run `/tests` to add one and update this section.
+- Test: `pnpm test`
+- Test (watch): `pnpm vitest`
 
 Browser testing is opt-in. Run `/tests browser` to add a browser harness and document its command as `Browser tests` here.
