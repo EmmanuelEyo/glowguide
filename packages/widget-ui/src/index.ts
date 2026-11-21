@@ -1,6 +1,7 @@
 export * from './types/widget';
 export * from './context/WidgetContext';
 export * from './hooks/useCamera';
+export * from './hooks/useGlowGuideSDK';
 export * from './components/WidgetHeader';
 export * from './components/WidgetProgress';
 export * from './components/WidgetFooter';

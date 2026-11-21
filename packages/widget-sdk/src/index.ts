@@ -14,6 +14,12 @@ export {
   EventEmitter,
   mountWidget,
 };
+export { useGlowGuideSDK } from '@glowguide/widget-ui';
+export type {
+  UseGlowGuideSDKOptions,
+  UseGlowGuideSDKReturn,
+  GlowGuideEventLogItem,
+} from '@glowguide/widget-ui';
 
 // Global browser window attachment
 declare global {

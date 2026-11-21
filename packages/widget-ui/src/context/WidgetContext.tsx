@@ -551,7 +551,7 @@ export function WidgetProvider({
     };
   }, [capturedImageUrl]);
 
-  // Document-level listener for elements with [data-open-widget] attribute
+  // Document-level listener for elements with [data-open-widget] attribute and SDK commands
   useEffect(() => {
     function handleDocumentClick(e: MouseEvent) {
       const target = e.target as HTMLElement | null;
@@ -564,9 +564,45 @@ export function WidgetProvider({
       }
     }
 
+    function handleCommandOpen() {
+      setIsOpen(true);
+    }
+
+    function handleCommandClose() {
+      closeWidget();
+    }
+
+    function handleCommandToggle() {
+      setIsOpen((prev) => !prev);
+    }
+
+    function handleCommandSetStep(e: Event) {
+      const customEvent = e as CustomEvent<{ step: SessionStepId }>;
+      if (customEvent.detail && customEvent.detail.step) {
+        setStep(customEvent.detail.step);
+      }
+    }
+
+    function handleCommandReset() {
+      resetSession();
+    }
+
     document.addEventListener('click', handleDocumentClick);
-    return () => document.removeEventListener('click', handleDocumentClick);
-  }, []);
+    window.addEventListener('glowguide:command:open', handleCommandOpen);
+    window.addEventListener('glowguide:command:close', handleCommandClose);
+    window.addEventListener('glowguide:command:toggle', handleCommandToggle);
+    window.addEventListener('glowguide:command:set-step', handleCommandSetStep);
+    window.addEventListener('glowguide:command:reset', handleCommandReset);
+
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+      window.removeEventListener('glowguide:command:open', handleCommandOpen);
+      window.removeEventListener('glowguide:command:close', handleCommandClose);
+      window.removeEventListener('glowguide:command:toggle', handleCommandToggle);
+      window.removeEventListener('glowguide:command:set-step', handleCommandSetStep);
+      window.removeEventListener('glowguide:command:reset', handleCommandReset);
+    };
+  }, [closeWidget, resetSession, setStep]);
 
   const session = useMemo<SessionState>(
     () => ({

@@ -11,8 +11,9 @@ const FOOTER_LINKS = {
     { href: '/products?category=masks', label: 'Masks' },
   ],
   'GlowGuide': [
+    { href: '/react-integration', label: 'React / Next.js Guide' },
+    { href: '/widget-preview', label: 'Widget Preview' },
     { href: '#', label: 'How It Works' },
-    { href: '#', label: 'Skin Analysis' },
     { href: '#', label: 'For Developers' },
   ],
   Company: [
