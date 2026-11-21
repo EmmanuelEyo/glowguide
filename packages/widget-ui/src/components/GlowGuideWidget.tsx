@@ -10,8 +10,11 @@ import type {
   ConsentGivenEvent,
   ScanCompleteEvent,
   ScanStartedEvent,
+  StepChangeEvent,
+  WidgetClosedEvent,
   WidgetConfig,
   WidgetMode,
+  WidgetOpenedEvent,
 } from '../types/widget';
 
 interface GlowGuideWidgetInnerProps {
@@ -34,6 +37,9 @@ export interface GlowGuideWidgetProps {
   config?: Partial<WidgetConfig>;
   mode?: WidgetMode;
   className?: string;
+  onOpened?: (event: WidgetOpenedEvent) => void;
+  onClosed?: (event: WidgetClosedEvent) => void;
+  onStepChange?: (event: StepChangeEvent) => void;
   onConsentGiven?: (event: ConsentGivenEvent) => void;
   onCameraError?: (event: CameraErrorEvent) => void;
   onScanStarted?: (event: ScanStartedEvent) => void;
@@ -47,6 +53,9 @@ export function GlowGuideWidget({
   config,
   mode,
   className,
+  onOpened,
+  onClosed,
+  onStepChange,
   onConsentGiven,
   onCameraError,
   onScanStarted,
@@ -63,6 +72,9 @@ export function GlowGuideWidget({
   return (
     <WidgetProvider
       config={mergedConfig}
+      onOpened={onOpened}
+      onClosed={onClosed}
+      onStepChange={onStepChange}
       onConsentGiven={onConsentGiven}
       onCameraError={onCameraError}
       onScanStarted={onScanStarted}

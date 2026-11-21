@@ -148,23 +148,20 @@ export function mountWidget(options: MountOptions): MountHandle {
       {
         config,
         mode: config.mode,
+        onOpened: (e) => onEvent?.('opened', e),
+        onClosed: (e) => onEvent?.('closed', e),
+        onStepChange: (e) => onEvent?.('step-change', e),
+        onScanStarted: (e) => onEvent?.('scan-started', e),
+        onScanComplete: (e) => onEvent?.('scan-complete', e),
+        onConsentGiven: (e) => onEvent?.('consent-given', e),
+        onCameraError: (e) => onEvent?.('camera-error', e),
         onAddToCart: (e) => onEvent?.('add-to-cart', e),
         onCheckoutRequest: (e) => onEvent?.('checkout-request', e),
-        onConsentGiven: (e) => onEvent?.('consent-given', e),
-        onScanComplete: (e) => onEvent?.('scan-complete', e),
-        onCameraError: (e) => onEvent?.('camera-error', e),
       },
       React.createElement(WidgetMountedBridge, {
         onEvent,
         onControllerReady: (c) => {
           controller = c;
-        },
-        onOpenStateChange: (open) => {
-          if (open) {
-            onEvent?.('opened', { timestamp: new Date().toISOString() });
-          } else {
-            onEvent?.('closed', { timestamp: new Date().toISOString() });
-          }
         },
       }),
     ),

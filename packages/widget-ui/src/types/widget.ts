@@ -18,9 +18,46 @@ export type CameraErrorCode =
   | 'DISCONNECTED'
   | 'UNKNOWN';
 
+export const GlowGuideEvent = {
+  READY: 'ready',
+  MOUNTED: 'mounted',
+  UNMOUNTED: 'unmounted',
+  OPENED: 'opened',
+  CLOSED: 'closed',
+  DESTROYED: 'destroyed',
+  STATE_CHANGE: 'state-change',
+  STEP_CHANGE: 'step-change',
+  CONSENT_GIVEN: 'consent-given',
+  SCAN_STARTED: 'scan-started',
+  SCAN_COMPLETE: 'scan-complete',
+  CAMERA_ERROR: 'camera-error',
+  ADD_TO_CART: 'add-to-cart',
+  CHECKOUT_REQUEST: 'checkout-request',
+} as const;
+
+export type GlowGuideEventType = (typeof GlowGuideEvent)[keyof typeof GlowGuideEvent];
+
+export interface WidgetOpenedEvent {
+  timestamp: string;
+  sessionId?: string;
+}
+
+export interface WidgetClosedEvent {
+  timestamp: string;
+  sessionId?: string;
+}
+
+export interface StepChangeEvent {
+  previousStep: SessionStepId;
+  currentStep: SessionStepId;
+  sessionId: string;
+  timestamp: string;
+}
+
 export interface CameraErrorEvent {
   code: CameraErrorCode;
   message: string;
+  timestamp?: string;
 }
 
 export type ObservationLevel =
@@ -67,6 +104,7 @@ export interface ScanStartedEvent {
 export interface ScanCompleteEvent {
   sessionId: string;
   result: AnalysisResult;
+  timestamp?: string;
 }
 
 export interface AddToCartEvent {
@@ -120,6 +158,13 @@ export interface WidgetConfig {
   launcherPosition?: LauncherPosition;
   autoOpen?: boolean;
   products?: Product[];
+  onOpened?: (event: WidgetOpenedEvent) => void;
+  onClosed?: (event: WidgetClosedEvent) => void;
+  onStepChange?: (event: StepChangeEvent) => void;
+  onConsentGiven?: (event: ConsentGivenEvent) => void;
+  onScanStarted?: (event: ScanStartedEvent) => void;
+  onScanComplete?: (event: ScanCompleteEvent) => void;
+  onCameraError?: (event: CameraErrorEvent) => void;
   onAddToCart?: (event: AddToCartEvent) => void;
   onCheckoutRequest?: (event: CheckoutRequestEvent) => void;
 }

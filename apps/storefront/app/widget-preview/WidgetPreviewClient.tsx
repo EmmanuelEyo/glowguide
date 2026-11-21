@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   WidgetProvider,
   InlineWidget,
@@ -10,16 +10,21 @@ import {
 } from '@glowguide/widget-ui';
 import type {
   AddToCartEvent,
-  CheckoutRequestEvent,
   SessionStepId,
 } from '@glowguide/widget-ui';
 import { useCart } from '@/contexts/CartContext';
 
-interface CartLogEntry {
+export type EventCategory = 'all' | 'cart' | 'journey' | 'errors';
+
+export interface StreamEventItem {
   id: string;
-  type: 'add-to-cart' | 'checkout-request';
+  type: string;
+  category: 'cart' | 'journey' | 'errors';
+  badge: string;
+  badgeColorClass: string;
   summary: string;
   timestamp: string;
+  payload: Record<string, unknown>;
 }
 
 const COLOR_PRESETS = [
@@ -31,7 +36,7 @@ const COLOR_PRESETS = [
 ];
 
 interface SessionInspectorProps {
-  cartEvents: CartLogEntry[];
+  streamEvents: StreamEventItem[];
   onClearEvents: () => void;
   brandName: string;
   onBrandNameChange: (val: string) => void;
@@ -41,8 +46,20 @@ interface SessionInspectorProps {
   onThemeChange: (val: 'light' | 'dark') => void;
 }
 
+function formatTime(isoString: string): string {
+  try {
+    const parts = isoString.split('T');
+    if (parts[1]) {
+      return parts[1].replace('Z', '').slice(0, 8);
+    }
+    return isoString;
+  } catch {
+    return isoString;
+  }
+}
+
 function SessionInspector({
-  cartEvents,
+  streamEvents,
   onClearEvents,
   brandName,
   onBrandNameChange,
@@ -69,6 +86,35 @@ function SessionInspector({
   const { itemCount, subtotal, openCart } = useCart();
   const [copied, setCopied] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<string>('auto');
+  const [activeCategory, setActiveCategory] = useState<EventCategory>('all');
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [copiedPayloadId, setCopiedPayloadId] = useState<string | null>(null);
+
+  const toggleExpand = (id: string) => {
+    setExpandedEventId((prev) => (prev === id ? null : id));
+  };
+
+  const handleCopyPayload = async (id: string, payload: Record<string, unknown>) => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+      setCopiedPayloadId(id);
+      setTimeout(() => setCopiedPayloadId(null), 2000);
+    } catch {
+      setCopiedPayloadId(id);
+      setTimeout(() => setCopiedPayloadId(null), 2000);
+    }
+  };
+
+  const counts = {
+    all: streamEvents.length,
+    cart: streamEvents.filter((e) => e.category === 'cart').length,
+    journey: streamEvents.filter((e) => e.category === 'journey').length,
+    errors: streamEvents.filter((e) => e.category === 'errors').length,
+  };
+
+  const filteredEvents = streamEvents.filter(
+    (e) => activeCategory === 'all' || e.category === activeCategory,
+  );
 
   const handleCopySessionId = async () => {
     try {
@@ -492,7 +538,7 @@ function SessionInspector({
         <div className="p-3.5 rounded-xl border border-luma-accent/30 bg-luma-accent/5">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[0.6875rem] uppercase tracking-wider text-luma-accent font-semibold">
-              Host Cart Sync & Events
+              Host Cart Sync
             </span>
             <button
               type="button"
@@ -525,7 +571,7 @@ function SessionInspector({
 
           {/* Last Interaction */}
           {cartInteraction && (
-            <div className="p-2 rounded-lg bg-luma-surface border border-luma-border text-left mb-3">
+            <div className="p-2 rounded-lg bg-luma-surface border border-luma-border text-left">
               <span className="text-[0.5625rem] uppercase tracking-wider text-luma-ghost block mb-0.5">
                 Last Interaction
               </span>
@@ -539,51 +585,140 @@ function SessionInspector({
               </div>
             </div>
           )}
+        </div>
 
-          {/* Real-time Event Stream */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[0.625rem] uppercase tracking-wider text-luma-ghost font-medium">
-                Dispatched Event Log ({cartEvents.length})
-              </span>
-              {cartEvents.length > 0 && (
-                <button
-                  type="button"
-                  onClick={onClearEvents}
-                  className="text-[0.5625rem] text-luma-ghost hover:text-luma-ink font-mono"
-                >
-                  Clear Log
-                </button>
-              )}
-            </div>
-
-            {cartEvents.length === 0 ? (
-              <p className="text-[0.625rem] text-luma-ghost italic p-2 bg-luma-surface rounded-lg border border-luma-border text-center">
-                No cart events dispatched yet. Click &ldquo;Add to Bag&rdquo; in recommendations to trigger.
-              </p>
-            ) : (
-              <div className="space-y-1.5 max-h-36 overflow-y-auto">
-                {cartEvents.map((evt) => (
-                  <div
-                    key={evt.id}
-                    className="p-1.5 rounded bg-luma-surface border border-luma-border text-left"
-                  >
-                    <div className="flex items-center justify-between text-[0.5625rem] mb-0.5">
-                      <span className="font-mono text-luma-accent font-semibold uppercase">
-                        {evt.type}
-                      </span>
-                      <span className="font-mono text-luma-ghost">
-                        {evt.timestamp.split('T')[1]?.slice(0, 8)}
-                      </span>
-                    </div>
-                    <p className="text-[0.625rem] text-luma-ink font-mono truncate">
-                      {evt.summary}
-                    </p>
-                  </div>
-                ))}
+        {/* Live Event Stream Inspector (Feature 14) */}
+        <div className="bg-luma-subtle p-3.5 rounded-xl border border-luma-border space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[0.6875rem] uppercase tracking-wider text-luma-ghost font-semibold">
+                  Live Event Stream
+                </span>
               </div>
+              <p className="text-[0.5625rem] text-luma-secondary mt-0.5">
+                Strongly typed events across widget, SDK, and DOM
+              </p>
+            </div>
+            {streamEvents.length > 0 && (
+              <button
+                type="button"
+                onClick={onClearEvents}
+                className="text-[0.625rem] text-luma-accent hover:text-luma-accent-dark font-mono font-medium hover:underline"
+              >
+                Clear Stream
+              </button>
             )}
           </div>
+
+          {/* Category Filter Tabs */}
+          <div className="grid grid-cols-4 gap-1 p-1 bg-luma-surface rounded-lg border border-luma-border">
+            {(
+              [
+                { id: 'all', label: 'All', count: counts.all },
+                { id: 'cart', label: 'Cart', count: counts.cart },
+                { id: 'journey', label: 'Journey', count: counts.journey },
+                { id: 'errors', label: 'Errors', count: counts.errors },
+              ] as const
+            ).map((tab) => {
+              const isActive = activeCategory === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveCategory(tab.id)}
+                  className={`flex items-center justify-center gap-1 py-1 px-1.5 rounded-md text-[0.625rem] font-medium transition-colors ${
+                    isActive
+                      ? 'bg-luma-ink text-luma-surface font-semibold shadow-xs'
+                      : 'text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`text-[0.5625rem] font-mono px-1 rounded-full ${
+                      isActive
+                        ? 'bg-luma-surface/20 text-luma-surface'
+                        : 'bg-luma-border text-luma-muted'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Event Stream Rows */}
+          {filteredEvents.length === 0 ? (
+            <div className="p-4 bg-luma-surface rounded-lg border border-luma-border text-center">
+              <p className="text-[0.625rem] text-luma-ghost italic">
+                {streamEvents.length === 0
+                  ? 'No events emitted yet. Interact with the widget to stream typed events in real-time.'
+                  : `No events in the "${activeCategory}" category yet.`}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-1.5 max-h-64 overflow-y-auto pr-0.5">
+              {filteredEvents.map((evt) => {
+                const isExpanded = expandedEventId === evt.id;
+                return (
+                  <div
+                    key={evt.id}
+                    className="p-2 rounded-lg bg-luma-surface border border-luma-border transition-colors hover:border-luma-accent/50 text-left"
+                  >
+                    <div
+                      className="flex items-center justify-between cursor-pointer select-none"
+                      onClick={() => toggleExpand(evt.id)}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className={`text-[0.5625rem] font-mono font-semibold uppercase px-1.5 py-0.5 rounded border ${evt.badgeColorClass} shrink-0`}
+                        >
+                          {evt.badge}
+                        </span>
+                        <span className="text-[0.625rem] font-medium text-luma-ink truncate">
+                          {evt.summary}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                        <span className="text-[0.5625rem] font-mono text-luma-ghost">
+                          {formatTime(evt.timestamp)}
+                        </span>
+                        <span className="text-[0.625rem] text-luma-ghost font-mono">
+                          {isExpanded ? '▲' : '▼'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Expandable JSON Payload Viewer */}
+                    {isExpanded && (
+                      <div className="mt-2 pt-2 border-t border-luma-border/60">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[0.5625rem] uppercase tracking-wider text-luma-ghost font-mono">
+                            Typed Payload (JSON)
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyPayload(evt.id, evt.payload);
+                            }}
+                            className="text-[0.5625rem] text-luma-accent hover:underline font-mono"
+                          >
+                            {copiedPayloadId === evt.id ? 'Copied!' : 'Copy JSON'}
+                          </button>
+                        </div>
+                        <pre className="text-[0.5625rem] font-mono bg-luma-subtle p-2 rounded-md border border-luma-border overflow-x-auto text-luma-ink max-h-36 leading-tight select-all">
+                          {JSON.stringify(evt.payload, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Captured Image Inspector */}
@@ -688,40 +823,133 @@ function SessionInspector({
 
 export function WidgetPreviewClient() {
   const { addItem, openCart } = useCart();
-  const [cartEvents, setCartEvents] = useState<CartLogEntry[]>([]);
+  const [streamEvents, setStreamEvents] = useState<StreamEventItem[]>([]);
   const [brandName, setBrandName] = useState('Luma Beauty');
   const [primaryColor, setPrimaryColor] = useState('#A7685E');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const eventConfigs: Array<{
+      name: string;
+      type: string;
+      category: 'cart' | 'journey' | 'errors';
+      badgeColorClass: string;
+      getSummary: (detail: Record<string, unknown>) => string;
+    }> = [
+      {
+        name: 'glowguide:opened',
+        type: 'opened',
+        category: 'journey',
+        badgeColorClass: 'bg-blue-50 text-blue-800 border-blue-200',
+        getSummary: (d) => `Widget opened (session: ${String(d.sessionId || '').slice(0, 8)})`,
+      },
+      {
+        name: 'glowguide:closed',
+        type: 'closed',
+        category: 'journey',
+        badgeColorClass: 'bg-zinc-100 text-zinc-700 border-zinc-200',
+        getSummary: (d) => `Widget closed (session: ${String(d.sessionId || '').slice(0, 8)})`,
+      },
+      {
+        name: 'glowguide:step-change',
+        type: 'step-change',
+        category: 'journey',
+        badgeColorClass: 'bg-luma-accent/10 text-luma-accent border-luma-accent/30',
+        getSummary: (d) => `Transitioned from "${String(d.previousStep)}" to "${String(d.currentStep)}"`,
+      },
+      {
+        name: 'glowguide:consent-given',
+        type: 'consent-given',
+        category: 'journey',
+        badgeColorClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        getSummary: () => 'Biometric consent granted by user',
+      },
+      {
+        name: 'glowguide:scan-started',
+        type: 'scan-started',
+        category: 'journey',
+        badgeColorClass: 'bg-amber-50 text-amber-800 border-amber-200',
+        getSummary: () => 'Diagnostic skin analysis started',
+      },
+      {
+        name: 'glowguide:scan-complete',
+        type: 'scan-complete',
+        category: 'journey',
+        badgeColorClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        getSummary: (d) => {
+          const res = d.result as { scenarioName?: string; observations?: unknown[] } | undefined;
+          return `Analysis complete: ${res?.scenarioName || 'Diagnostic'} (${res?.observations?.length || 0} observations)`;
+        },
+      },
+      {
+        name: 'glowguide:camera-error',
+        type: 'camera-error',
+        category: 'errors',
+        badgeColorClass: 'bg-red-50 text-red-800 border-red-200',
+        getSummary: (d) => `Camera failure [${String(d.code || 'UNKNOWN')}]: ${String(d.message || '')}`,
+      },
+      {
+        name: 'glowguide:add-to-cart',
+        type: 'add-to-cart',
+        category: 'cart',
+        badgeColorClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        getSummary: (d) => {
+          const prod = d.product as { name?: string } | undefined;
+          return `Added "${prod?.name || String(d.productId)}" (qty: ${String(d.quantity || 1)})`;
+        },
+      },
+      {
+        name: 'glowguide:checkout-request',
+        type: 'checkout-request',
+        category: 'cart',
+        badgeColorClass: 'bg-purple-50 text-purple-800 border-purple-200',
+        getSummary: (d) => {
+          const ids = d.productIds as string[] | undefined;
+          return `Checkout routine with ${ids?.length || 0} products`;
+        },
+      },
+    ];
+
+    const cleanups = eventConfigs.map(({ name, type, category, badgeColorClass, getSummary }) => {
+      const handler = (e: Event) => {
+        const customEvent = e as CustomEvent<Record<string, unknown>>;
+        const detail = (customEvent.detail || {}) as Record<string, unknown>;
+        const timestamp = typeof detail.timestamp === 'string' ? detail.timestamp : new Date().toISOString();
+        const entry: StreamEventItem = {
+          id: 'evt_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36),
+          type,
+          category,
+          badge: type,
+          badgeColorClass,
+          summary: getSummary(detail),
+          timestamp,
+          payload: detail,
+        };
+        setStreamEvents((prev) => [entry, ...prev]);
+      };
+
+      window.addEventListener(name, handler);
+      return () => window.removeEventListener(name, handler);
+    });
+
+    return () => {
+      cleanups.forEach((c) => c());
+    };
+  }, []);
+
   const handleAddToCart = (event: AddToCartEvent) => {
     addItem(event.productId, event.quantity || 1);
-    setCartEvents((prev) => [
-      {
-        id: 'evt_' + Math.random().toString(36).substring(2, 9),
-        type: 'add-to-cart',
-        summary: `Added "${event.product?.name || event.productId}" (qty: ${event.quantity})`,
-        timestamp: event.timestamp,
-      },
-      ...prev,
-    ]);
     openCart();
   };
 
-  const handleCheckoutRequest = (event: CheckoutRequestEvent) => {
-    setCartEvents((prev) => [
-      {
-        id: 'evt_' + Math.random().toString(36).substring(2, 9),
-        type: 'checkout-request',
-        summary: `Checkout routine with ${event.productIds.length} products`,
-        timestamp: event.timestamp,
-      },
-      ...prev,
-    ]);
+  const handleCheckoutRequest = () => {
     openCart();
   };
 
   const handleClearEvents = () => {
-    setCartEvents([]);
+    setStreamEvents([]);
   };
 
   return (
@@ -745,7 +973,7 @@ export function WidgetPreviewClient() {
         {/* Developer Session Inspector */}
         <div className="lg:col-span-5">
           <SessionInspector
-            cartEvents={cartEvents}
+            streamEvents={streamEvents}
             onClearEvents={handleClearEvents}
             brandName={brandName}
             onBrandNameChange={setBrandName}

@@ -25,6 +25,8 @@ export class GlowGuideSDK implements GlowGuideInstance {
   private _cleanupFns: Array<() => void> = [];
   private _mountHandle: MountHandle | null = null;
   private _mountContainer: HTMLElement | null = null;
+  private _lastDispatchedKey = '';
+  private _lastDispatchedTime = 0;
 
   constructor(config?: GlowGuideConfig) {
     if (config) {
@@ -83,12 +85,13 @@ export class GlowGuideSDK implements GlowGuideInstance {
     const timestamp = new Date().toISOString();
 
     // Notify state change and ready
-    this._events.emit('state-change', {
+    this.dispatchSdkEvent('state-change', {
       previous: previousState,
       current: 'ready',
+      timestamp,
     });
 
-    this._events.emit('ready', {
+    this.dispatchSdkEvent('ready', {
       instance: this,
       timestamp,
     });
@@ -119,12 +122,7 @@ export class GlowGuideSDK implements GlowGuideInstance {
       config: this.config,
       target: targetCandidate,
       onEvent: (event, data) => {
-        this._events.emit(event, data);
-        if (event === 'opened') {
-          this._isOpen = true;
-        } else if (event === 'closed') {
-          this._isOpen = false;
-        }
+        this.dispatchSdkEvent(event, data);
       },
     });
 
@@ -133,14 +131,15 @@ export class GlowGuideSDK implements GlowGuideInstance {
     this._lifecycleState = 'mounted';
 
     const timestamp = new Date().toISOString();
-    this._events.emit('mounted', {
+    this.dispatchSdkEvent('mounted', {
       container: this._mountContainer,
       mode: this.config.mode || 'floating',
       timestamp,
     });
-    this._events.emit('state-change', {
+    this.dispatchSdkEvent('state-change', {
       previous: previousState,
       current: 'mounted',
+      timestamp,
     });
 
     return this;
@@ -160,10 +159,11 @@ export class GlowGuideSDK implements GlowGuideInstance {
     this._lifecycleState = 'ready';
 
     const timestamp = new Date().toISOString();
-    this._events.emit('unmounted', { timestamp });
-    this._events.emit('state-change', {
+    this.dispatchSdkEvent('unmounted', { timestamp });
+    this.dispatchSdkEvent('state-change', {
       previous: previousState,
       current: 'ready',
+      timestamp,
     });
   }
 
@@ -180,13 +180,14 @@ export class GlowGuideSDK implements GlowGuideInstance {
       this._mountHandle.open();
     }
 
-    this._events.emit('opened', { timestamp });
+    this.dispatchSdkEvent('opened', { timestamp, sessionId: this._sessionId || undefined });
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
         new CustomEvent('glowguide:open', {
           detail: { sessionId: this._sessionId, timestamp },
           bubbles: true,
+          composed: true,
         }),
       );
     }
@@ -205,22 +206,21 @@ export class GlowGuideSDK implements GlowGuideInstance {
       this._mountHandle.close();
     }
 
-    this._events.emit('closed', { timestamp });
+    this.dispatchSdkEvent('closed', { timestamp, sessionId: this._sessionId || undefined });
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
         new CustomEvent('glowguide:close', {
           detail: { sessionId: this._sessionId, timestamp },
           bubbles: true,
+          composed: true,
         }),
       );
     }
   }
 
   toggle(): void {
-    if (this._mountHandle) {
-      this._mountHandle.toggle();
-    } else if (this._isOpen) {
+    if (this._isOpen) {
       this.close();
     } else {
       this.open();
@@ -253,10 +253,11 @@ export class GlowGuideSDK implements GlowGuideInstance {
     this._lifecycleState = 'destroyed';
     const timestamp = new Date().toISOString();
 
-    this._events.emit('destroyed', { timestamp });
-    this._events.emit('state-change', {
+    this.dispatchSdkEvent('destroyed', { timestamp });
+    this.dispatchSdkEvent('state-change', {
       previous: previousState,
       current: 'destroyed',
+      timestamp,
     });
 
     // Clear event listeners after emitting final destruction events
@@ -301,31 +302,117 @@ export class GlowGuideSDK implements GlowGuideInstance {
     return this._events.once(event, handler);
   }
 
+  emit<K extends keyof SDKEventMap>(event: K, data: SDKEventMap[K]): void {
+    this.assertNotDestroyed();
+    this.dispatchSdkEvent(event, data);
+  }
+
+  private dispatchSdkEvent<K extends keyof SDKEventMap>(event: K, data: SDKEventMap[K]): void {
+    if (this._lifecycleState === 'destroyed') return;
+
+    // Deduplicate identical events arriving within 25ms (e.g. direct mount bridge + DOM CustomEvent)
+    const key = `${String(event)}_${JSON.stringify(data)}`;
+    const now = Date.now();
+    if (this._lastDispatchedKey === key && now - this._lastDispatchedTime < 25) {
+      return;
+    }
+    this._lastDispatchedKey = key;
+    this._lastDispatchedTime = now;
+
+    if (event === 'opened') {
+      this._isOpen = true;
+    } else if (event === 'closed') {
+      this._isOpen = false;
+    }
+
+    // 1. Emit to active EventEmitter listeners
+    this._events.emit(event, data);
+
+    // 2. Invoke matching config callback with isolated error protection
+    if (this._config) {
+      try {
+        switch (event) {
+          case 'ready':
+            this._config.onReady?.(data as SDKEventMap['ready']);
+            break;
+          case 'mounted':
+            this._config.onMounted?.(data as SDKEventMap['mounted']);
+            break;
+          case 'unmounted':
+            this._config.onUnmounted?.(data as SDKEventMap['unmounted']);
+            break;
+          case 'destroyed':
+            this._config.onDestroyed?.(data as SDKEventMap['destroyed']);
+            break;
+          case 'state-change':
+            this._config.onStateChange?.(data as SDKEventMap['state-change']);
+            break;
+          case 'opened':
+            this._config.onOpened?.(data as SDKEventMap['opened']);
+            break;
+          case 'closed':
+            this._config.onClosed?.(data as SDKEventMap['closed']);
+            break;
+          case 'step-change':
+            this._config.onStepChange?.(data as SDKEventMap['step-change']);
+            break;
+          case 'consent-given':
+            this._config.onConsentGiven?.(data as SDKEventMap['consent-given']);
+            break;
+          case 'scan-started':
+            this._config.onScanStarted?.(data as SDKEventMap['scan-started']);
+            break;
+          case 'scan-complete':
+            this._config.onScanComplete?.(data as SDKEventMap['scan-complete']);
+            break;
+          case 'camera-error':
+            this._config.onCameraError?.(data as SDKEventMap['camera-error']);
+            break;
+          case 'add-to-cart':
+            this._config.onAddToCart?.(data as SDKEventMap['add-to-cart']);
+            break;
+          case 'checkout-request':
+            this._config.onCheckoutRequest?.(data as SDKEventMap['checkout-request']);
+            break;
+        }
+      } catch (err) {
+        console.error(`GlowGuide SDK: Error in config callback for event "${String(event)}":`, err);
+      }
+    }
+  }
+
   private setupDomEventListeners(): void {
     if (typeof window === 'undefined') return;
 
-    const onAddToCart = (e: Event) => {
-      const customEvt = e as CustomEvent;
-      if (customEvt.detail) {
-        this._events.emit('add-to-cart', customEvt.detail);
-        this._config?.onAddToCart?.(customEvt.detail);
-      }
-    };
+    const eventNames: Array<{ dom: string; sdk: keyof SDKEventMap }> = [
+      { dom: 'glowguide:add-to-cart', sdk: 'add-to-cart' },
+      { dom: 'glowguide:checkout-request', sdk: 'checkout-request' },
+      { dom: 'glowguide:consent-given', sdk: 'consent-given' },
+      { dom: 'glowguide:scan-started', sdk: 'scan-started' },
+      { dom: 'glowguide:scan-complete', sdk: 'scan-complete' },
+      { dom: 'glowguide:camera-error', sdk: 'camera-error' },
+      { dom: 'glowguide:step-change', sdk: 'step-change' },
+      { dom: 'glowguide:opened', sdk: 'opened' },
+      { dom: 'glowguide:closed', sdk: 'closed' },
+    ];
 
-    const onCheckoutRequest = (e: Event) => {
-      const customEvt = e as CustomEvent;
-      if (customEvt.detail) {
-        this._events.emit('checkout-request', customEvt.detail);
-        this._config?.onCheckoutRequest?.(customEvt.detail);
-      }
-    };
+    const listeners: Array<{ dom: string; handler: EventListener }> = [];
 
-    window.addEventListener('glowguide:add-to-cart', onAddToCart);
-    window.addEventListener('glowguide:checkout-request', onCheckoutRequest);
+    for (const { dom, sdk } of eventNames) {
+      const handler: EventListener = (e: Event) => {
+        const customEvt = e as CustomEvent;
+        if (customEvt.detail) {
+          this.dispatchSdkEvent(sdk, customEvt.detail);
+        }
+      };
+      window.addEventListener(dom, handler);
+      listeners.push({ dom, handler });
+    }
 
     this._cleanupFns.push(() => {
-      window.removeEventListener('glowguide:add-to-cart', onAddToCart);
-      window.removeEventListener('glowguide:checkout-request', onCheckoutRequest);
+      for (const { dom, handler } of listeners) {
+        window.removeEventListener(dom, handler);
+      }
     });
   }
 

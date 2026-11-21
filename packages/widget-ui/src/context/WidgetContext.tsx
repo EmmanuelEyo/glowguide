@@ -25,9 +25,12 @@ import type {
   ScanStartedEvent,
   SessionState,
   SessionStepId,
+  StepChangeEvent,
+  WidgetClosedEvent,
   WidgetConfig,
   WidgetContextValue,
   WidgetMode,
+  WidgetOpenedEvent,
 } from '../types/widget';
 import { analyzeSkin } from '../services/skinAnalysis';
 import { getRecommendations } from '../services/recommendationEngine';
@@ -67,6 +70,9 @@ export function useWidget(): WidgetContextValue {
 interface WidgetProviderProps {
   children: React.ReactNode;
   config?: Partial<WidgetConfig>;
+  onOpened?: (event: WidgetOpenedEvent) => void;
+  onClosed?: (event: WidgetClosedEvent) => void;
+  onStepChange?: (event: StepChangeEvent) => void;
   onConsentGiven?: (event: ConsentGivenEvent) => void;
   onCameraError?: (event: CameraErrorEvent) => void;
   onScanStarted?: (event: ScanStartedEvent) => void;
@@ -78,6 +84,9 @@ interface WidgetProviderProps {
 export function WidgetProvider({
   children,
   config: userConfig,
+  onOpened,
+  onClosed,
+  onStepChange,
   onConsentGiven,
   onCameraError,
   onScanStarted,
@@ -112,6 +121,70 @@ export function WidgetProvider({
   const [cartInteraction, setCartInteraction] = useState<CartInteraction | null>(null);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isInitialMount = useRef(true);
+  const prevStepRef = useRef<SessionStepId>(currentStep);
+
+  // Dispatch opened / closed events on visibility changes
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (!isOpen) return;
+    }
+    const timestamp = new Date().toISOString();
+    if (isOpen) {
+      const openedEvent: WidgetOpenedEvent = { timestamp, sessionId };
+      onOpened?.(openedEvent);
+      mergedConfig.onOpened?.(openedEvent);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('glowguide:opened', {
+            detail: openedEvent,
+            bubbles: true,
+            composed: true,
+          }),
+        );
+      }
+    } else {
+      const closedEvent: WidgetClosedEvent = { timestamp, sessionId };
+      onClosed?.(closedEvent);
+      mergedConfig.onClosed?.(closedEvent);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('glowguide:closed', {
+            detail: closedEvent,
+            bubbles: true,
+            composed: true,
+          }),
+        );
+      }
+    }
+  }, [isOpen, sessionId, onOpened, onClosed, mergedConfig]);
+
+  // Dispatch step-change event on step transitions
+  useEffect(() => {
+    if (prevStepRef.current !== currentStep) {
+      const previousStep = prevStepRef.current;
+      prevStepRef.current = currentStep;
+      const timestamp = new Date().toISOString();
+      const stepEvent: StepChangeEvent = {
+        previousStep,
+        currentStep,
+        sessionId,
+        timestamp,
+      };
+      onStepChange?.(stepEvent);
+      mergedConfig.onStepChange?.(stepEvent);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('glowguide:step-change', {
+            detail: stepEvent,
+            bubbles: true,
+            composed: true,
+          }),
+        );
+      }
+    }
+  }, [currentStep, sessionId, onStepChange, mergedConfig]);
 
   const mode: WidgetMode = mergedConfig.mode ?? 'floating';
 
@@ -166,10 +239,21 @@ export function WidgetProvider({
       setConsentGiven(given);
       setConsentTimestamp(timestamp);
       if (given && timestamp) {
-        onConsentGiven?.({ timestamp, sessionId });
+        const consentEvent: ConsentGivenEvent = { timestamp, sessionId };
+        onConsentGiven?.(consentEvent);
+        mergedConfig.onConsentGiven?.(consentEvent);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('glowguide:consent-given', {
+              detail: consentEvent,
+              bubbles: true,
+              composed: true,
+            }),
+          );
+        }
       }
     },
-    [sessionId, onConsentGiven],
+    [sessionId, onConsentGiven, mergedConfig],
   );
 
   const setCameraState = useCallback((state: CameraState) => {
@@ -198,10 +282,24 @@ export function WidgetProvider({
     (err: CameraErrorEvent | null) => {
       setCameraErrorState(err);
       if (err) {
-        onCameraError?.(err);
+        const errEvent: CameraErrorEvent = {
+          ...err,
+          timestamp: err.timestamp || new Date().toISOString(),
+        };
+        onCameraError?.(errEvent);
+        mergedConfig.onCameraError?.(errEvent);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('glowguide:camera-error', {
+              detail: errEvent,
+              bubbles: true,
+              composed: true,
+            }),
+          );
+        }
       }
     },
-    [onCameraError],
+    [onCameraError, mergedConfig],
   );
 
   const clearCameraError = useCallback(() => {
@@ -244,7 +342,18 @@ export function WidgetProvider({
       setCurrentStep('analyzing');
 
       const timestamp = new Date().toISOString();
-      onScanStarted?.({ sessionId, timestamp });
+      const startEvent: ScanStartedEvent = { sessionId, timestamp };
+      onScanStarted?.(startEvent);
+      mergedConfig.onScanStarted?.(startEvent);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('glowguide:scan-started', {
+            detail: startEvent,
+            bubbles: true,
+            composed: true,
+          }),
+        );
+      }
 
       try {
         const result = await analyzeSkin({
@@ -258,7 +367,24 @@ export function WidgetProvider({
         setRecommendations(recs);
         setProcessingStatus('done');
         setCurrentStep('report');
-        onScanComplete?.({ sessionId, result });
+
+        const completeTimestamp = new Date().toISOString();
+        const completeEvent: ScanCompleteEvent = {
+          sessionId,
+          result,
+          timestamp: completeTimestamp,
+        };
+        onScanComplete?.(completeEvent);
+        mergedConfig.onScanComplete?.(completeEvent);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('glowguide:scan-complete', {
+              detail: completeEvent,
+              bubbles: true,
+              composed: true,
+            }),
+          );
+        }
         return result;
       } catch (err: unknown) {
         if (controller.signal.aborted) {
@@ -274,7 +400,7 @@ export function WidgetProvider({
         }
       }
     },
-    [sessionId, capturedImageUrl, mergedConfig.products, onScanStarted, onScanComplete],
+    [sessionId, capturedImageUrl, mergedConfig, onScanStarted, onScanComplete],
   );
 
   const addToCart = useCallback(

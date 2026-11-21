@@ -8,13 +8,45 @@ import type {
   RecommendedProduct,
   ScanCompleteEvent,
   ScanStartedEvent,
+  StepChangeEvent,
+  WidgetClosedEvent,
   WidgetMode,
+  WidgetOpenedEvent,
   WidgetTheme,
 } from '@glowguide/widget-ui';
+import { GlowGuideEvent, type GlowGuideEventType } from '@glowguide/widget-ui';
+
+export { GlowGuideEvent };
+export type { GlowGuideEventType };
 
 export type SDKLifecycleState = 'uninitialized' | 'ready' | 'mounted' | 'destroyed';
 
 export type LauncherPosition = 'bottom-right' | 'bottom-left';
+
+export interface ReadyEvent {
+  instance: GlowGuideInstance;
+  timestamp: string;
+}
+
+export interface MountedEvent {
+  container: HTMLElement;
+  mode: WidgetMode;
+  timestamp: string;
+}
+
+export interface UnmountedEvent {
+  timestamp: string;
+}
+
+export interface DestroyedEvent {
+  timestamp: string;
+}
+
+export interface StateChangeEvent {
+  previous: SDKLifecycleState;
+  current: SDKLifecycleState;
+  timestamp?: string;
+}
 
 export interface GlowGuideConfig {
   storeId: string;
@@ -28,10 +60,20 @@ export interface GlowGuideConfig {
   autoMount?: boolean;
   shadowDom?: boolean;
   products?: Product[];
+  onReady?: (event: ReadyEvent) => void;
+  onMounted?: (event: MountedEvent) => void;
+  onUnmounted?: (event: UnmountedEvent) => void;
+  onDestroyed?: (event: DestroyedEvent) => void;
+  onStateChange?: (event: StateChangeEvent) => void;
+  onOpened?: (event: WidgetOpenedEvent) => void;
+  onClosed?: (event: WidgetClosedEvent) => void;
+  onStepChange?: (event: StepChangeEvent) => void;
+  onConsentGiven?: (event: ConsentGivenEvent) => void;
+  onScanStarted?: (event: ScanStartedEvent) => void;
+  onScanComplete?: (event: ScanCompleteEvent) => void;
+  onCameraError?: (event: CameraErrorEvent) => void;
   onAddToCart?: (event: AddToCartEvent) => void;
   onCheckoutRequest?: (event: CheckoutRequestEvent) => void;
-  onConsentGiven?: (event: ConsentGivenEvent) => void;
-  onScanComplete?: (event: ScanCompleteEvent) => void;
 }
 
 export interface SDKState {
@@ -44,13 +86,14 @@ export interface SDKState {
 }
 
 export interface SDKEventMap {
-  'ready': { instance: GlowGuideInstance; timestamp: string };
-  'mounted': { container: HTMLElement; mode: WidgetMode; timestamp: string };
-  'unmounted': { timestamp: string };
-  'opened': { timestamp: string };
-  'closed': { timestamp: string };
-  'destroyed': { timestamp: string };
-  'state-change': { previous: SDKLifecycleState; current: SDKLifecycleState };
+  'ready': ReadyEvent;
+  'mounted': MountedEvent;
+  'unmounted': UnmountedEvent;
+  'opened': WidgetOpenedEvent;
+  'closed': WidgetClosedEvent;
+  'destroyed': DestroyedEvent;
+  'state-change': StateChangeEvent;
+  'step-change': StepChangeEvent;
   'add-to-cart': AddToCartEvent;
   'checkout-request': CheckoutRequestEvent;
   'consent-given': ConsentGivenEvent;
@@ -91,6 +134,7 @@ export interface GlowGuideInstance {
   on<K extends keyof SDKEventMap>(event: K, handler: (data: SDKEventMap[K]) => void): () => void;
   off<K extends keyof SDKEventMap>(event: K, handler: (data: SDKEventMap[K]) => void): void;
   once<K extends keyof SDKEventMap>(event: K, handler: (data: SDKEventMap[K]) => void): () => void;
+  emit<K extends keyof SDKEventMap>(event: K, data: SDKEventMap[K]): void;
 }
 
 export type {
@@ -103,6 +147,9 @@ export type {
   RecommendedProduct,
   ScanCompleteEvent,
   ScanStartedEvent,
+  StepChangeEvent,
+  WidgetClosedEvent,
   WidgetMode,
+  WidgetOpenedEvent,
   WidgetTheme,
 };
