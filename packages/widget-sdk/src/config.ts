@@ -1,13 +1,18 @@
+import { isValidCssColor } from '@glowguide/widget-ui';
 import type { GlowGuideConfig } from './types';
 
 export const DEFAULT_CONFIG: Required<
-  Pick<GlowGuideConfig, 'mode' | 'primaryColor' | 'theme' | 'launcherPosition' | 'autoOpen'>
+  Pick<
+    GlowGuideConfig,
+    'mode' | 'primaryColor' | 'theme' | 'launcherPosition' | 'autoOpen' | 'shadowDom'
+  >
 > = {
   mode: 'floating',
   primaryColor: '#A7685E',
   theme: 'light',
   launcherPosition: 'bottom-right',
   autoOpen: false,
+  shadowDom: true,
 };
 
 export function validateConfig(raw: unknown): GlowGuideConfig {
@@ -39,19 +44,32 @@ export function validateConfig(raw: unknown): GlowGuideConfig {
     );
   }
 
-  if (config.primaryColor !== undefined && typeof config.primaryColor !== 'string') {
-    throw new Error('GlowGuide SDK Error: "primaryColor" must be a valid CSS color string.');
+  if (config.primaryColor !== undefined) {
+    if (typeof config.primaryColor !== 'string' || config.primaryColor.trim().length === 0) {
+      throw new Error('GlowGuide SDK Error: "primaryColor" must be a non-empty CSS color string.');
+    }
+  }
+
+  if (config.shadowDom !== undefined && typeof config.shadowDom !== 'boolean') {
+    throw new Error('GlowGuide SDK Error: "shadowDom" must be a boolean.');
   }
 
   return raw as GlowGuideConfig;
 }
 
 export function normalizeConfig(config: GlowGuideConfig): Readonly<GlowGuideConfig> {
+  const primaryColor =
+    config.primaryColor && isValidCssColor(config.primaryColor)
+      ? config.primaryColor.trim()
+      : DEFAULT_CONFIG.primaryColor;
+
   const normalized: GlowGuideConfig = {
     ...DEFAULT_CONFIG,
     ...config,
     storeId: config.storeId.trim(),
     brandName: config.brandName || 'GlowGuide',
+    primaryColor,
+    shadowDom: config.shadowDom !== false,
   };
 
   return Object.freeze(normalized);

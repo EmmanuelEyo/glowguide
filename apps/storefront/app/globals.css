@@ -116,6 +116,33 @@
 }
 
 /* =============================================================================
+   Dark Theme Overrides
+   ============================================================================= */
+
+[data-theme="dark"] {
+  --color-luma-page:          #1A1715;
+  --color-luma-surface:       #24201D;
+  --color-luma-overlay:       #2D2825;
+  --color-luma-subtle:        #332E2A;
+  --color-luma-mist:          #3E3732;
+  --color-luma-canvas:        #12100E;
+  --color-luma-ink:           #F7F0EA;
+  --color-luma-secondary:     #D4C9C1;
+  --color-luma-muted:         #A3978F;
+  --color-luma-ghost:         #857A73;
+  --color-luma-inverse:       #1A1715;
+  --color-luma-disabled:      #5A524C;
+  --color-luma-border:        #3D3631;
+  --color-luma-border-mid:    #524A43;
+  --color-luma-border-strong: #695F56;
+  --color-luma-gold:          #F2C94C;
+  --color-luma-success:       #7BB67B;
+  --color-luma-warning:       #D6B470;
+  --color-luma-error:         #C97A7A;
+  color-scheme: dark;
+}
+
+/* =============================================================================
    Base reset
    ============================================================================= */
 

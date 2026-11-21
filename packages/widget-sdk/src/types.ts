@@ -26,6 +26,7 @@ export interface GlowGuideConfig {
   container?: HTMLElement | string | null;
   autoOpen?: boolean;
   autoMount?: boolean;
+  shadowDom?: boolean;
   products?: Product[];
   onAddToCart?: (event: AddToCartEvent) => void;
   onCheckoutRequest?: (event: CheckoutRequestEvent) => void;
@@ -66,6 +67,7 @@ export interface MountOptions {
 
 export interface MountHandle {
   container: HTMLElement;
+  shadowRoot?: ShadowRoot | null;
   unmount: () => void;
   open: () => void;
   close: () => void;

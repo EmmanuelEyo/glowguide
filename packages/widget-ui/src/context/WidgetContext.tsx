@@ -91,7 +91,12 @@ export function WidgetProvider({
   );
 
   const [isOpen, setIsOpen] = useState(mergedConfig.autoOpen ?? false);
-  const [sessionId, setSessionId] = useState<string>(() => generateSessionId());
+  const [sessionId, setSessionId] = useState<string>('sess_init');
+
+  useEffect(() => {
+    setSessionId(generateSessionId());
+  }, []);
+
   const [currentStep, setCurrentStep] = useState<SessionStepId>('welcome');
   const [consentGiven, setConsentGiven] = useState(false);
   const [consentTimestamp, setConsentTimestamp] = useState<string | null>(null);
@@ -299,6 +304,7 @@ export function WidgetProvider({
           new CustomEvent('glowguide:add-to-cart', {
             detail: event,
             bubbles: true,
+            composed: true,
           }),
         );
       }
@@ -329,6 +335,7 @@ export function WidgetProvider({
             new CustomEvent('glowguide:add-to-cart', {
               detail: event,
               bubbles: true,
+              composed: true,
             }),
           );
         }
@@ -373,6 +380,7 @@ export function WidgetProvider({
           new CustomEvent('glowguide:checkout-request', {
             detail: event,
             bubbles: true,
+            composed: true,
           }),
         );
       }

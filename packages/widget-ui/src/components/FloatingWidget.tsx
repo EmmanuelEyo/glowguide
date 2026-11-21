@@ -3,10 +3,13 @@
 import { useEffect, useRef } from 'react';
 import { useWidget } from '../context/WidgetContext';
 import { WidgetShell } from './WidgetShell';
+import { generateThemeVariables } from '../styles/theme';
 
 export function FloatingWidget() {
   const { isOpen, openWidget, closeWidget, config } = useWidget();
   const dialogRef = useRef<HTMLDivElement>(null);
+  const themeVars = generateThemeVariables(config);
+  const themeClass = `glowguide-theme-root ${config.theme === 'dark' ? 'dark' : ''}`;
 
   // Close on Escape key
   useEffect(() => {
@@ -26,7 +29,11 @@ export function FloatingWidget() {
     : 'sm:bottom-24 sm:right-6';
 
   return (
-    <>
+    <div
+      className={themeClass}
+      data-theme={config.theme || 'light'}
+      style={themeVars as React.CSSProperties}
+    >
       {/* Floating launcher trigger button */}
       <button
         type="button"
@@ -68,6 +75,6 @@ export function FloatingWidget() {
           className="h-full max-h-[85vh] max-sm:rounded-b-none"
         />
       </div>
-    </>
+    </div>
   );
 }

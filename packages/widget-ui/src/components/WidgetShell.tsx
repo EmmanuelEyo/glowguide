@@ -57,7 +57,8 @@ export function WidgetShell({
 
   return (
     <div
-      className={`flex flex-col bg-luma-surface rounded-2xl border border-luma-border overflow-hidden shadow-2xl ${className}`}
+      data-theme={config.theme || 'light'}
+      className={`glowguide-widget-shell flex flex-col bg-luma-surface rounded-2xl border border-luma-border overflow-hidden shadow-2xl ${className}`}
     >
       <WidgetHeader
         brandName={config.brandName || 'GlowGuide'}

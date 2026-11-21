@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
-import { GlowGuideWidget, useWidget } from '@glowguide/widget-ui';
+import { GlowGuideWidget, useWidget, generateThemeCss } from '@glowguide/widget-ui';
+import widgetStyles from './styles/widget.css?inline';
 import type { MountHandle, MountOptions } from './types';
 
 function resolveContainer(target: HTMLElement | string): HTMLElement {
@@ -107,8 +108,39 @@ export function mountWidget(options: MountOptions): MountHandle {
     }
   }
 
+  let shadowRoot: ShadowRoot | null = null;
+  let mountTarget: HTMLElement = container;
+
+  // Shadow DOM encapsulation
+  if (config.shadowDom !== false && typeof container.attachShadow === 'function') {
+    shadowRoot = container.shadowRoot || container.attachShadow({ mode: 'open' });
+    shadowRoot.replaceChildren();
+
+    // 1. Inject compiled Tailwind stylesheet
+    const styleEl = document.createElement('style');
+    styleEl.id = 'glowguide-widget-styles';
+    styleEl.textContent = widgetStyles;
+    shadowRoot.appendChild(styleEl);
+
+    // 2. Inject dynamic merchant theme tokens CSS custom properties
+    const themeEl = document.createElement('style');
+    themeEl.id = 'glowguide-theme-tokens';
+    themeEl.textContent = generateThemeCss(config);
+    shadowRoot.appendChild(themeEl);
+
+    // 3. Create isolated root node for React tree
+    const appContainer = document.createElement('div');
+    appContainer.className = `glowguide-shadow-root glowguide-theme-root ${
+      config.theme === 'dark' ? 'dark' : ''
+    }`;
+    appContainer.setAttribute('data-theme', config.theme || 'light');
+    shadowRoot.appendChild(appContainer);
+
+    mountTarget = appContainer;
+  }
+
   let controller: ControllerRef | null = null;
-  const root: Root = createRoot(container);
+  const root: Root = createRoot(mountTarget);
 
   root.render(
     React.createElement(
@@ -140,11 +172,15 @@ export function mountWidget(options: MountOptions): MountHandle {
 
   return {
     container,
+    shadowRoot,
     unmount: () => {
       try {
         root.unmount();
       } catch (err) {
         console.error('GlowGuide SDK: Error unmounting React root:', err);
+      }
+      if (shadowRoot) {
+        shadowRoot.replaceChildren();
       }
       if (createdElement && container.parentNode) {
         container.parentNode.removeChild(container);
@@ -154,21 +190,27 @@ export function mountWidget(options: MountOptions): MountHandle {
       if (controller) {
         controller.open();
       } else {
-        window.dispatchEvent(new CustomEvent('glowguide:open'));
+        window.dispatchEvent(
+          new CustomEvent('glowguide:open', { bubbles: true, composed: true }),
+        );
       }
     },
     close: () => {
       if (controller) {
         controller.close();
       } else {
-        window.dispatchEvent(new CustomEvent('glowguide:close'));
+        window.dispatchEvent(
+          new CustomEvent('glowguide:close', { bubbles: true, composed: true }),
+        );
       }
     },
     toggle: () => {
       if (controller) {
         controller.toggle();
       } else {
-        window.dispatchEvent(new CustomEvent('glowguide:toggle'));
+        window.dispatchEvent(
+          new CustomEvent('glowguide:toggle', { bubbles: true, composed: true }),
+        );
       }
     },
   };

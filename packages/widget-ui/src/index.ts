@@ -17,3 +17,4 @@ export * from './components/recommendations/RecommendedProducts';
 export * from './components/camera/CameraErrorRecovery';
 export * from './services/skinAnalysis';
 export * from './services/recommendationEngine';
+export * from './styles/theme';

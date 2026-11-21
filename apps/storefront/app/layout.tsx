@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Cormorant_Garamond, Inter } from 'next/font/google';
 import './globals.css';
 import Nav from '@/components/layout/Nav';
@@ -41,7 +42,9 @@ export default function RootLayout({
           <CartDrawer />
           <main>{children}</main>
           <Footer />
-          <StorefrontWidget />
+          <Suspense fallback={null}>
+            <StorefrontWidget />
+          </Suspense>
         </CartProvider>
       </body>
     </html>

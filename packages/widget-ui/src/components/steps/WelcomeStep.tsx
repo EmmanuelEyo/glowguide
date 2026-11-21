@@ -7,7 +7,8 @@ interface WelcomeStepProps {
 }
 
 export function WelcomeStep({ onStart }: WelcomeStepProps) {
-  const { nextStep } = useWidget();
+  const { nextStep, config } = useWidget();
+  const brandName = config.brandName || 'GlowGuide';
 
   function handleStart() {
     if (onStart) {
@@ -25,7 +26,7 @@ export function WelcomeStep({ onStart }: WelcomeStepProps) {
       </div>
 
       <p className="text-[0.6875rem] font-medium tracking-[0.14em] uppercase text-luma-ghost mb-2">
-        Powered by GlowGuide
+        {brandName !== 'GlowGuide' ? `${brandName} • Powered by GlowGuide` : 'Powered by GlowGuide'}
       </p>
 
       <h3 className="font-display text-[1.75rem] sm:text-2xl font-light text-luma-ink leading-tight mb-3">

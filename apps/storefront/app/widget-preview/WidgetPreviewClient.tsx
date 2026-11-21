@@ -22,12 +22,35 @@ interface CartLogEntry {
   timestamp: string;
 }
 
+const COLOR_PRESETS = [
+  { name: 'Terracotta (Luma)', hex: '#A7685E', bgClass: 'bg-[#A7685E]' },
+  { name: 'Forest Sage', hex: '#2D6A4F', bgClass: 'bg-[#2D6A4F]' },
+  { name: 'Royal Indigo', hex: '#2563EB', bgClass: 'bg-[#2563EB]' },
+  { name: 'Berry Plum', hex: '#831843', bgClass: 'bg-[#831843]' },
+  { name: 'Obsidian Noir', hex: '#1E293B', bgClass: 'bg-[#1E293B]' },
+];
+
 interface SessionInspectorProps {
   cartEvents: CartLogEntry[];
   onClearEvents: () => void;
+  brandName: string;
+  onBrandNameChange: (val: string) => void;
+  primaryColor: string;
+  onPrimaryColorChange: (val: string) => void;
+  theme: 'light' | 'dark';
+  onThemeChange: (val: 'light' | 'dark') => void;
 }
 
-function SessionInspector({ cartEvents, onClearEvents }: SessionInspectorProps) {
+function SessionInspector({
+  cartEvents,
+  onClearEvents,
+  brandName,
+  onBrandNameChange,
+  primaryColor,
+  onPrimaryColorChange,
+  theme,
+  onThemeChange,
+}: SessionInspectorProps) {
   const {
     session,
     currentStep,
@@ -107,6 +130,113 @@ function SessionInspector({ cartEvents, onClearEvents }: SessionInspectorProps) 
       </div>
 
       <div className="space-y-4">
+        {/* Merchant Branding & Theming Controls */}
+        <div className="bg-luma-subtle p-3.5 rounded-xl border border-luma-border space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[0.6875rem] uppercase tracking-wider text-luma-ghost font-semibold">
+              Merchant Branding & Theming
+            </span>
+            <span className="text-[0.625rem] px-2 py-0.5 rounded font-mono font-medium uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
+              Shadow DOM Isolated
+            </span>
+          </div>
+
+          {/* Brand Name Input */}
+          <div>
+            <label
+              htmlFor="brand-name-input"
+              className="block text-[0.625rem] uppercase tracking-wider text-luma-secondary mb-1"
+            >
+              Merchant Brand Name
+            </label>
+            <input
+              id="brand-name-input"
+              type="text"
+              value={brandName}
+              onChange={(e) => onBrandNameChange(e.target.value)}
+              placeholder="e.g. Luma Beauty, Aura Botanicals"
+              className="w-full text-xs bg-luma-surface border border-luma-border rounded-lg px-2.5 py-1.5 text-luma-ink focus:outline-none focus:ring-1 focus:ring-luma-accent"
+            />
+          </div>
+
+          {/* Theme Mode Toggle */}
+          <div>
+            <span className="block text-[0.625rem] uppercase tracking-wider text-luma-secondary mb-1.5">
+              Theme Mode
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => onThemeChange('light')}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-medium border transition-colors ${
+                  theme === 'light'
+                    ? 'bg-luma-surface text-luma-ink border-luma-accent shadow-xs'
+                    : 'bg-luma-surface/50 text-luma-muted border-luma-border hover:bg-luma-surface'
+                }`}
+              >
+                <span>☀️</span>
+                <span>Light Theme</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onThemeChange('dark')}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-medium border transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-stone-900 text-stone-100 border-luma-accent shadow-xs'
+                    : 'bg-luma-surface/50 text-luma-muted border-luma-border hover:bg-luma-surface'
+                }`}
+              >
+                <span>🌙</span>
+                <span>Dark Theme</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Primary Accent Color */}
+          <div>
+            <div className="flex items-center justify-between text-[0.625rem] uppercase tracking-wider text-luma-secondary mb-1.5">
+              <span>Primary Accent Color</span>
+              <span className="font-mono text-luma-ghost lowercase">{primaryColor}</span>
+            </div>
+
+            {/* Presets and Custom Picker */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 flex-1">
+                {COLOR_PRESETS.map((preset) => {
+                  const isSelected = primaryColor.toLowerCase() === preset.hex.toLowerCase();
+                  return (
+                    <button
+                      key={preset.hex}
+                      type="button"
+                      onClick={() => onPrimaryColorChange(preset.hex)}
+                      title={`${preset.name} (${preset.hex})`}
+                      className={`w-7 h-7 rounded-full border-2 transition-transform ${preset.bgClass} ${
+                        isSelected
+                          ? 'border-luma-ink scale-110 shadow-xs'
+                          : 'border-transparent hover:scale-105'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Native color input */}
+              <label
+                title="Custom color picker"
+                className="relative flex items-center justify-center w-7 h-7 rounded-full border border-luma-border bg-luma-surface cursor-pointer hover:border-luma-accent"
+              >
+                <input
+                  type="color"
+                  value={primaryColor}
+                  onChange={(e) => onPrimaryColorChange(e.target.value)}
+                  className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                />
+                <span className="text-xs">🎨</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
         {/* Session ID */}
         <div>
           <div className="flex items-center justify-between text-xs mb-1">
@@ -559,6 +689,9 @@ function SessionInspector({ cartEvents, onClearEvents }: SessionInspectorProps) 
 export function WidgetPreviewClient() {
   const { addItem, openCart } = useCart();
   const [cartEvents, setCartEvents] = useState<CartLogEntry[]>([]);
+  const [brandName, setBrandName] = useState('Luma Beauty');
+  const [primaryColor, setPrimaryColor] = useState('#A7685E');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const handleAddToCart = (event: AddToCartEvent) => {
     addItem(event.productId, event.quantity || 1);
@@ -595,7 +728,9 @@ export function WidgetPreviewClient() {
     <WidgetProvider
       config={{
         storeId: 'luma-beauty',
-        brandName: 'Luma Beauty',
+        brandName,
+        primaryColor,
+        theme,
         mode: 'inline',
       }}
       onAddToCart={handleAddToCart}
@@ -612,6 +747,12 @@ export function WidgetPreviewClient() {
           <SessionInspector
             cartEvents={cartEvents}
             onClearEvents={handleClearEvents}
+            brandName={brandName}
+            onBrandNameChange={setBrandName}
+            primaryColor={primaryColor}
+            onPrimaryColorChange={setPrimaryColor}
+            theme={theme}
+            onThemeChange={setTheme}
           />
         </div>
       </div>

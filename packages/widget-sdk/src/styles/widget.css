@@ -1,0 +1,96 @@
+@import "tailwindcss";
+@source "../../../packages/widget-ui/src";
+
+@theme {
+  /* Surface and page colours */
+  --color-luma-page:        #F7F0EA;
+  --color-luma-surface:     #FDFAF7;
+  --color-luma-overlay:     #FFFFFF;
+  --color-luma-subtle:      #F0E9E2;
+  --color-luma-mist:        #E8E0D8;
+  --color-luma-canvas:      #302B28;
+
+  /* Typography */
+  --color-luma-ink:         #302B28;
+  --color-luma-secondary:   #6B5F58;
+  --color-luma-muted:       #7A706B;
+  --color-luma-ghost:       #9C8E86;
+  --color-luma-inverse:     #FDFAF7;
+  --color-luma-disabled:    #BEB5AE;
+
+  /* Accent palette */
+  --color-luma-accent:      #A7685E;
+  --color-luma-accent-dark: #8F5248;
+  --color-luma-blush:       #E8C9C0;
+  --color-luma-blush-pale:  #F5E6E2;
+  --color-luma-deco:        #D5C4A5;
+
+  /* Borders */
+  --color-luma-border:        #E7DED7;
+  --color-luma-border-mid:    #CFC6BC;
+  --color-luma-border-strong: #B8ADA4;
+
+  /* Semantic feedback */
+  --color-luma-gold:        #D4A843;
+  --color-luma-success:     #5A7A5A;
+  --color-luma-warning:     #A88B5A;
+  --color-luma-error:       #A05858;
+
+  /* Fonts */
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-sans:    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  /* Type scale */
+  --text-2xs:  0.6875rem;
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 0.9375rem;
+  --text-md:   1.0625rem;
+  --text-lg:   1.1875rem;
+  --text-xl:   1.375rem;
+  --text-2xl:  1.75rem;
+  --text-3xl:  2.25rem;
+
+  /* Spacing & Radii */
+  --spacing: 0.25rem;
+  --radius-xs:   3px;
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-xl:   32px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-xs:  0 1px 3px rgba(48,43,40,0.06);
+  --shadow-sm:  0 2px 8px rgba(48,43,40,0.08);
+  --shadow-md:  0 4px 16px rgba(48,43,40,0.10);
+  --shadow-lg:  0 8px 32px rgba(48,43,40,0.13);
+  --shadow-xl:  0 16px 48px rgba(48,43,40,0.16);
+  --shadow-2xl: 0 24px 64px rgba(48,43,40,0.20);
+}
+
+/* =============================================================================
+   Shadow DOM resets and base styling
+   ============================================================================= */
+
+:host {
+  display: block;
+  font-family: var(--font-sans);
+  color: var(--color-luma-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
