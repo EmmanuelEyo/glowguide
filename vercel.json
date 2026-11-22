@@ -1,6 +1,3 @@
 {
-  "buildCommand": "pnpm --filter @glowguide/storefront build",
-  "outputDirectory": "apps/storefront/.next",
-  "installCommand": "pnpm install --no-frozen-lockfile",
-  "framework": "nextjs"
+  "comment": "Vercel project root directory should be set to apps/storefront. See apps/storefront/vercel.json for build config."
 }
