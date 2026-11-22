@@ -10,7 +10,9 @@
     "build:vanilla": "pnpm --filter @glowguide/vanilla-storefront build",
     "start:storefront": "pnpm --filter @glowguide/storefront start",
     "build:sdk": "pnpm --filter @glowguide/widget-sdk build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "keywords": [],
   "author": "",
