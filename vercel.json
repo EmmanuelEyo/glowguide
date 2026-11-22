@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm --filter @glowguide/storefront build",
+  "outputDirectory": "apps/storefront/.next",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "framework": "nextjs"
+}
