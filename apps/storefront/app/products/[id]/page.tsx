@@ -94,7 +94,7 @@ export default async function ProductDetailPage({ params }: Props) {
                   type="button"
                   aria-label={`View image ${i + 1}`}
                   className={cn(
-                    'flex-1 aspect-square rounded-lg flex items-center justify-center text-2xl transition-opacity',
+                    'flex-1 aspect-square rounded-lg flex items-center justify-center text-2xl transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-2',
                     i === 0
                       ? 'opacity-100 border-2 border-luma-accent'
                       : 'opacity-50 border-2 border-luma-border',

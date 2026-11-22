@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { WidgetHeader } from './WidgetHeader';
 import { WidgetProgress } from './WidgetProgress';
 import { WelcomeStep } from './steps/WelcomeStep';
@@ -55,11 +56,26 @@ export function WidgetShell({
   const { config, currentStep } = useWidget();
   const currentMeta = STEP_METADATA[currentStep] || STEP_METADATA.welcome;
 
+  // Live region announcement text, updated on each step change
+  const [announcement, setAnnouncement] = useState('');
+  useEffect(() => {
+    setAnnouncement(`Now on ${currentMeta.title}, ${currentMeta.badge}`);
+  }, [currentStep, currentMeta.title, currentMeta.badge]);
+
   return (
     <div
       data-theme={config.theme || 'light'}
       className={`glowguide-widget-shell flex flex-col bg-luma-surface rounded-2xl border border-luma-border overflow-hidden shadow-2xl ${className}`}
     >
+      {/* Screen-reader live region: announces step changes to assistive technology */}
+      <span
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement}
+      </span>
+
       <WidgetHeader
         brandName={config.brandName || 'GlowGuide'}
         stepTitle={currentMeta.title}

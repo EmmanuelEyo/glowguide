@@ -63,7 +63,7 @@ export default async function Footer() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="block text-sm mb-3 hover:text-luma-inverse transition-colors"
+                    className="block text-sm mb-3 hover:text-luma-inverse transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-2 rounded-sm"
                   >
                     {link.label}
                   </Link>

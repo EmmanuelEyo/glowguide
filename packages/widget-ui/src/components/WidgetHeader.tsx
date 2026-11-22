@@ -43,7 +43,7 @@ export function WidgetHeader({
           type="button"
           onClick={onClose}
           aria-label="Close skin analysis"
-          className="flex items-center justify-center w-8 h-8 rounded-md text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle transition-colors"
+          className="flex items-center justify-center w-8 h-8 rounded-md text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-1"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path

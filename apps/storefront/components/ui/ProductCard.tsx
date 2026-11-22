@@ -90,7 +90,7 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
               aria-label={`Add ${name} to bag`}
               onClick={handleQuickAdd}
               className={cn(
-                'inline-flex items-center justify-center rounded-[3px] border border-luma-border-strong text-luma-ink text-[0.625rem] font-medium tracking-[0.08em] uppercase transition-colors hover:bg-luma-accent hover:border-luma-accent hover:text-luma-inverse',
+                'inline-flex items-center justify-center rounded-[3px] border border-luma-border-strong text-luma-ink text-[0.625rem] font-medium tracking-[0.08em] uppercase transition-colors hover:bg-luma-accent hover:border-luma-accent hover:text-luma-inverse focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-2',
                 compact ? 'h-8 px-3' : 'h-9 px-4',
               )}
             >

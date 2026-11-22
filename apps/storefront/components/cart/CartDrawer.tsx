@@ -43,7 +43,7 @@ export default function CartDrawer() {
           <button
             onClick={closeCart}
             aria-label="Close bag"
-            className="flex items-center justify-center w-9 h-9 rounded-md text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle transition-colors"
+            className="flex items-center justify-center w-9 h-9 rounded-md text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-1"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -68,7 +68,7 @@ export default function CartDrawer() {
               <Link
                 href="/products"
                 onClick={closeCart}
-                className="inline-flex items-center justify-center h-10 px-6 rounded-[3px] border border-luma-border-strong text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase hover:bg-luma-subtle transition-colors"
+                className="inline-flex items-center justify-center h-10 px-6 rounded-[3px] border border-luma-border-strong text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase hover:bg-luma-subtle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-2"
               >
                 Shop Products
               </Link>
@@ -110,7 +110,7 @@ export default function CartDrawer() {
                             onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                             disabled={item.quantity <= 1}
                             className={cn(
-                              'w-8 h-8 flex items-center justify-center text-base font-light transition-colors',
+                              'w-8 h-8 flex items-center justify-center text-base font-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-1',
                               item.quantity <= 1
                                 ? 'text-luma-disabled cursor-not-allowed'
                                 : 'text-luma-ink hover:bg-luma-subtle cursor-pointer',
@@ -129,7 +129,7 @@ export default function CartDrawer() {
                             type="button"
                             aria-label={`Increase quantity of ${product.name}`}
                             onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                            className="w-8 h-8 flex items-center justify-center text-base font-light text-luma-ink hover:bg-luma-subtle transition-colors cursor-pointer"
+                            className="w-8 h-8 flex items-center justify-center text-base font-light text-luma-ink hover:bg-luma-subtle transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-1"
                           >
                             +
                           </button>
@@ -143,7 +143,7 @@ export default function CartDrawer() {
                             type="button"
                             aria-label={`Remove ${product.name} from bag`}
                             onClick={() => removeItem(item.productId)}
-                            className="text-luma-ghost hover:text-luma-error transition-colors"
+                            className="text-luma-ghost hover:text-luma-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-1 rounded-sm"
                           >
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                               <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />

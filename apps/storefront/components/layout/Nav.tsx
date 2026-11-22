@@ -42,7 +42,7 @@ export default function Nav() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-[0.6875rem] tracking-[0.14em] uppercase text-luma-secondary py-2 border-b border-transparent hover:text-luma-ink hover:border-luma-border transition-colors"
+              className="text-[0.6875rem] tracking-[0.14em] uppercase text-luma-secondary py-2 border-b border-transparent hover:text-luma-ink hover:border-luma-border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-2 rounded-sm"
             >
               {link.label}
             </Link>
@@ -55,7 +55,7 @@ export default function Nav() {
           <button
             data-open-widget
             aria-label="Open GlowGuide skin analysis"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-[3px] bg-luma-accent hover:bg-luma-accent-dark text-luma-inverse text-[0.6875rem] font-medium tracking-[0.08em] uppercase transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-[3px] bg-luma-accent hover:bg-luma-accent-dark text-luma-inverse text-[0.6875rem] font-medium tracking-[0.08em] uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-2"
           >
             <span aria-hidden="true">✦</span> Analyse
           </button>
@@ -64,7 +64,7 @@ export default function Nav() {
           <button
             onClick={openCart}
             aria-label={itemCount > 0 ? `Open cart — ${itemCount} item${itemCount === 1 ? '' : 's'}` : 'Open cart — empty'}
-            className="flex items-center justify-center w-10 h-10 rounded-md text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle transition-colors relative"
+            className="flex items-center justify-center w-10 h-10 rounded-md text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle transition-colors relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-2"
           >
             <svg
               width="20"
@@ -99,7 +99,7 @@ export default function Nav() {
             aria-label={isOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isOpen}
             aria-controls="mobile-menu"
-            className="flex md:hidden items-center justify-center w-10 h-10 rounded-md text-luma-ink"
+            className="flex md:hidden items-center justify-center w-10 h-10 rounded-md text-luma-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-2"
           >
             <svg
               width="20"
@@ -142,7 +142,7 @@ export default function Nav() {
               key={link.href}
               href={link.href}
               onClick={toggle}
-              className="text-[0.6875rem] tracking-[0.14em] uppercase text-luma-secondary py-2 border-b border-luma-border"
+              className="text-[0.6875rem] tracking-[0.14em] uppercase text-luma-secondary py-2 border-b border-luma-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-2 rounded-sm"
             >
               {link.label}
             </Link>

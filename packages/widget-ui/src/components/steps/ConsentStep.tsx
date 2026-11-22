@@ -86,7 +86,8 @@ export function ConsentStep() {
             type="checkbox"
             checked={agreed}
             onChange={(e) => handleCheckboxChange(e.target.checked)}
-            className="w-4 h-4 mt-0.5 rounded border-luma-border-strong text-luma-accent accent-luma-accent cursor-pointer"
+            aria-describedby={errorMessage ? 'glowguide-consent-error' : undefined}
+            className="w-4 h-4 mt-0.5 rounded border-luma-border-strong text-luma-accent accent-luma-accent cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-1"
           />
           <span className="text-xs text-luma-ink leading-snug">
             I agree to temporary in-browser camera analysis for personalised product recommendations.
@@ -97,6 +98,7 @@ export function ConsentStep() {
       {/* Error validation feedback */}
       {errorMessage && (
         <div
+          id="glowguide-consent-error"
           role="alert"
           className="mb-4 p-3 rounded-md bg-luma-blush-pale/60 border border-luma-blush text-xs text-luma-accent-dark flex items-center gap-2"
         >

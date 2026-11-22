@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useWidget } from '../../context/WidgetContext';
 import { ANALYSIS_PROGRESS_PHASES } from '../../services/skinAnalysis';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 export function AnalyzingStep() {
   const { session, startAnalysis, cancelAnalysis, prevStep, setStep } = useWidget();
   const [phaseIndex, setPhaseIndex] = useState(0);
+  const reducedMotion = useReducedMotion();
 
   // Cycle through progress milestone messages while loading
   useEffect(() => {
@@ -79,7 +81,10 @@ export function AnalyzingStep() {
     <div className="flex flex-col items-center text-center p-6 sm:p-8">
       {/* Live progress badge */}
       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-luma-subtle border border-luma-border text-[0.625rem] font-medium tracking-[0.08em] uppercase text-luma-secondary mb-4">
-        <span className="w-2 h-2 rounded-full bg-luma-accent animate-ping" aria-hidden="true" />
+        <span
+          className={`w-2 h-2 rounded-full bg-luma-accent ${reducedMotion ? '' : 'animate-ping'}`}
+          aria-hidden="true"
+        />
         <span>Evaluating Profile</span>
       </div>
 
@@ -87,11 +92,11 @@ export function AnalyzingStep() {
         Analyzing Your Skin
       </h3>
 
-      <p className="text-xs text-luma-secondary leading-relaxed max-w-[320px] mb-6 min-h-[32px] transition-opacity duration-300">
+      <p className="text-xs text-luma-secondary leading-relaxed max-w-[320px] mb-6 min-h-[32px]">
         {ANALYSIS_PROGRESS_PHASES[phaseIndex]}
       </p>
 
-      {/* Visual scanning container with animated radar beam */}
+      {/* Visual scanning container */}
       <div className="w-full max-w-[280px] aspect-[4/3] rounded-2xl bg-luma-canvas border border-luma-border overflow-hidden shadow-inner mb-6 relative">
         {session.capturedImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -102,23 +107,23 @@ export function AnalyzingStep() {
           </div>
         )}
 
-        {/* Radar scan grid overlay */}
+        {/* Radar scan grid overlay -- static when motion is reduced */}
         <div
-          className="absolute inset-0 bg-gradient-to-b from-transparent via-luma-accent/20 to-transparent animate-pulse pointer-events-none"
+          className={`absolute inset-0 bg-gradient-to-b from-transparent via-luma-accent/20 to-transparent pointer-events-none ${reducedMotion ? 'opacity-50' : 'animate-pulse'}`}
           aria-hidden="true"
         />
 
-        {/* Central landmark scanning oval */}
+        {/* Central landmark scanning oval -- static when motion is reduced */}
         <div
-          className="absolute inset-0 m-auto w-32 h-44 rounded-[50%] border border-luma-accent/60 pointer-events-none flex items-center justify-center animate-pulse"
+          className={`absolute inset-0 m-auto w-32 h-44 rounded-[50%] border border-luma-accent/60 pointer-events-none flex items-center justify-center ${reducedMotion ? '' : 'animate-pulse'}`}
           aria-hidden="true"
         >
           <div className="w-20 h-28 rounded-[50%] border border-dashed border-luma-accent/40" />
         </div>
 
-        {/* Moving horizontal scanning beam */}
+        {/* Scanning beam -- static bar when motion is reduced */}
         <div
-          className="absolute inset-x-0 h-1 bg-luma-accent shadow-[0_0_12px_rgba(167,104,94,0.8)] animate-bounce top-1/2 pointer-events-none"
+          className={`absolute inset-x-0 h-1 bg-luma-accent top-1/2 pointer-events-none ${reducedMotion ? 'opacity-60' : 'shadow-[0_0_12px_rgba(167,104,94,0.8)] animate-bounce'}`}
           aria-hidden="true"
         />
       </div>
@@ -131,7 +136,7 @@ export function AnalyzingStep() {
       </div>
 
       {/* Cancel action */}
-      <button type="button" onClick={cancelAnalysis} className="h-10 px-6 rounded-[3px] border border-luma-border text-luma-secondary hover:text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors">
+      <button type="button" onClick={cancelAnalysis} className="h-10 px-6 rounded-[3px] border border-luma-border text-luma-secondary hover:text-luma-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-1">
         Cancel Analysis
       </button>
     </div>
