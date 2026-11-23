@@ -11,7 +11,6 @@ export default function PlaygroundPage() {
   return (
     <div className="py-12 bg-luma-page min-h-[90vh]">
       <div className="container max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-10">
           <p className="text-[0.6875rem] font-semibold tracking-[0.16em] uppercase text-luma-accent mb-2">
             Developer Integration Playground
@@ -25,7 +24,6 @@ export default function PlaygroundPage() {
           </p>
         </div>
 
-        {/* Playground Client Workspace */}
         <PlaygroundClient />
       </div>
     </div>

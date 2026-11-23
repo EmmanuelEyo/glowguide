@@ -75,7 +75,6 @@ export function PlaygroundClient() {
 
   return (
     <div className="space-y-8">
-      {/* Overview Cards & Quick Navigation */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-xl border border-luma-border bg-luma-surface shadow-sm">
           <div className="flex items-center gap-2 mb-1.5">
@@ -114,9 +113,7 @@ export function PlaygroundClient() {
         </div>
       </div>
 
-      {/* Main Workspace: 2-Column Responsive Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Configurator Panel */}
         <div className="lg:col-span-4 xl:col-span-4 sticky top-24">
           <PlaygroundConfigurator
             config={config}
@@ -124,7 +121,6 @@ export function PlaygroundClient() {
             onReset={handleResetConfig}
           />
 
-          {/* Quick Links */}
           <div className="mt-4 p-4 rounded-xl border border-luma-border bg-luma-subtle/50 text-xs text-luma-secondary space-y-2">
             <span className="font-semibold text-luma-ink uppercase tracking-wider text-[0.625rem] block">
               Related Developer Guides
@@ -148,27 +144,23 @@ export function PlaygroundClient() {
           </div>
         </div>
 
-        {/* Right Column: Preview Canvas & Tabs */}
         <div className="lg:col-span-8 xl:col-span-8 space-y-6">
-          {/* Live Preview Canvas */}
           <PlaygroundPreview
             config={config}
             onEvent={handleEvent}
             onAddToCart={handleAddToCart}
           />
 
-          {/* Bottom Tabs: Snippet Generator & Event Inspector */}
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-luma-border pb-2">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setActiveBottomTab('snippets')}
-                  className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${
-                    activeBottomTab === 'snippets'
+                  className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${activeBottomTab === 'snippets'
                       ? 'bg-luma-accent text-luma-inverse'
                       : 'text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle'
-                  }`}
+                    }`}
                 >
                   <span>📋 Integration Snippets</span>
                 </button>
@@ -176,17 +168,15 @@ export function PlaygroundClient() {
                 <button
                   type="button"
                   onClick={() => setActiveBottomTab('events')}
-                  className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${
-                    activeBottomTab === 'events'
+                  className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${activeBottomTab === 'events'
                       ? 'bg-luma-accent text-luma-inverse'
                       : 'text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle'
-                  }`}
+                    }`}
                 >
                   <span>⚡ Event Stream Inspector</span>
                   {events.length > 0 && (
-                    <span className={`text-[0.625rem] px-1.5 py-0.2 rounded-full ${
-                      activeBottomTab === 'events' ? 'bg-white/20 text-white' : 'bg-luma-accent text-white'
-                    }`}>
+                    <span className={`text-[0.625rem] px-1.5 py-0.2 rounded-full ${activeBottomTab === 'events' ? 'bg-white/20 text-white' : 'bg-luma-accent text-white'
+                      }`}>
                       {events.length}
                     </span>
                   )}
@@ -198,7 +188,6 @@ export function PlaygroundClient() {
               </span>
             </div>
 
-            {/* Tab Contents */}
             {activeBottomTab === 'snippets' ? (
               <PlaygroundSnippetGenerator config={config} />
             ) : (

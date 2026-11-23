@@ -28,7 +28,6 @@ export function PlaygroundEventInspector({
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
-      // Ignore clipboard write failure in restricted environments
     }
   };
 
@@ -52,7 +51,6 @@ export function PlaygroundEventInspector({
 
   return (
     <div className="bg-luma-surface border border-luma-border rounded-xl shadow-sm overflow-hidden flex flex-col">
-      {/* Inspector Header */}
       <div className="p-4 border-b border-luma-border bg-luma-subtle/50 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-luma-accent">
@@ -84,7 +82,6 @@ export function PlaygroundEventInspector({
         </div>
       </div>
 
-      {/* Filter Tabs */}
       <div className="px-4 py-2 border-b border-luma-border bg-luma-surface flex items-center gap-1.5 overflow-x-auto">
         {categories.map((tab) => {
           const isActive = activeCategory === tab.id;
@@ -93,16 +90,14 @@ export function PlaygroundEventInspector({
               key={tab.id}
               type="button"
               onClick={() => setActiveCategory(tab.id)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 shrink-0 ${
-                isActive
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 shrink-0 ${isActive
                   ? 'bg-luma-accent text-luma-inverse font-semibold'
                   : 'bg-luma-subtle text-luma-secondary hover:text-luma-ink'
-              }`}
+                }`}
             >
               <span>{tab.label}</span>
-              <span className={`text-[0.625rem] px-1.5 py-0.2 rounded-full ${
-                isActive ? 'bg-white/20 text-white' : 'bg-luma-border text-luma-ghost'
-              }`}>
+              <span className={`text-[0.625rem] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-luma-border text-luma-ghost'
+                }`}>
                 {tab.count}
               </span>
             </button>
@@ -110,7 +105,6 @@ export function PlaygroundEventInspector({
         })}
       </div>
 
-      {/* Event Stream Log List */}
       <div className="p-4 space-y-2 max-h-[380px] overflow-y-auto font-sans">
         {filteredEvents.length === 0 ? (
           <div className="py-12 text-center">
@@ -133,15 +127,14 @@ export function PlaygroundEventInspector({
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded text-[0.625rem] font-mono font-semibold tracking-wider uppercase ${
-                      evt.category === 'errors'
+                    <span className={`px-2 py-0.5 rounded text-[0.625rem] font-mono font-semibold tracking-wider uppercase ${evt.category === 'errors'
                         ? 'bg-red-50 text-red-700 border border-red-200'
                         : evt.category === 'cart'
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                        : evt.category === 'journey'
-                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                        : 'bg-zinc-100 text-zinc-700 border border-zinc-200'
-                    }`}>
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          : evt.category === 'journey'
+                            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                            : 'bg-zinc-100 text-zinc-700 border border-zinc-200'
+                      }`}>
                       {evt.badge}
                     </span>
                     <span className="font-mono font-medium text-luma-ink">

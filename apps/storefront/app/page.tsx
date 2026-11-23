@@ -10,14 +10,12 @@ const bestsellers = PRODUCTS.filter((p) => BESTSELLERS.includes(p.id));
 export default function HomePage() {
   return (
     <>
-      {/* ── Hero ────────────────────────────────────────────────────────────── */}
       <section
         aria-label="Hero"
         className="min-h-[85vh] flex items-center py-24 bg-gradient-to-b from-luma-page to-luma-surface"
       >
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-            {/* Copy */}
             <div>
               <p className="font-sans text-[0.6875rem] font-medium tracking-[0.14em] uppercase text-luma-ghost mb-4">
                 Luma Beauty - Powered by GlowGuide
@@ -54,16 +52,13 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Hero art */}
             <div
               className="flex justify-center items-center"
               aria-hidden="true"
             >
               <div className="w-[280px] h-[280px] md:w-[400px] md:h-[400px] rounded-[32px] bg-[linear-gradient(145deg,#E8C9C0_0%,#D5A898_40%,#A7685E_100%)] relative overflow-hidden shadow-xl">
-                {/* Decorative circles */}
                 <div className="absolute w-[260px] h-[260px] rounded-full bg-white/10 -top-[60px] -right-[60px]" />
                 <div className="absolute w-[180px] h-[180px] rounded-full bg-white/[0.08] bottom-5 -left-[40px]" />
-                {/* GlowGuide mark */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/60">
                   <span className="text-[64px] leading-none">✦</span>
                   <span className="text-[11px] tracking-[0.14em] uppercase font-medium">
@@ -75,8 +70,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ── Bestsellers ─────────────────────────────────────────────────────── */}
       <section
         className="py-20 pb-24 bg-luma-page"
         aria-labelledby="bestsellers-heading"
@@ -111,7 +104,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── GlowGuide Discovery ──────────────────────────────────────────────── */}
       <section
         className="bg-luma-blush-pale border-y border-luma-accent/15 py-20"
         aria-labelledby="glowguide-heading"
