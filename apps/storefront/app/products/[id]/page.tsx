@@ -47,7 +47,6 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <>
-      {/* Breadcrumb */}
       <div className="container pt-4">
         <nav aria-label="Breadcrumb">
           <ol className="flex items-center gap-2 text-xs text-luma-ghost tracking-[0.02em] list-none">
@@ -70,14 +69,10 @@ export default async function ProductDetailPage({ params }: Props) {
         </nav>
       </div>
 
-      {/* Product hero */}
       <section className="container py-12 pb-16">
-        {/* Two-column grid: stacks to single col on mobile */}
         <div className="grid grid-cols-1 md:grid-cols-[minmax(280px,55%)_1fr] gap-16 items-start">
 
-          {/* Left: image area */}
           <div>
-            {/* Main image — gradient is dynamic per-product, inline style required */}
             <div
               className="rounded-xl overflow-hidden aspect-square flex flex-col items-center justify-center text-[7.5rem] relative"
               style={{ background: product.gradient }}
@@ -86,7 +81,6 @@ export default async function ProductDetailPage({ params }: Props) {
               <span className="text-[7.5rem]">{product.emoji}</span>
             </div>
 
-            {/* Thumbnails */}
             <div className="flex gap-3 mt-4">
               {[0, 1, 2].map((i) => (
                 <button
@@ -107,19 +101,15 @@ export default async function ProductDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Right: product info */}
           <div className="pt-2">
-            {/* Brand */}
             <p className="text-[0.6875rem] font-medium tracking-[0.12em] uppercase text-luma-ghost mb-3">
               {product.brand}
             </p>
 
-            {/* Name */}
             <h1 className="font-display text-[clamp(1.75rem,3vw,2.75rem)] font-light leading-[1.15] text-luma-ink mb-4">
               {product.name}
             </h1>
 
-            {/* Rating */}
             <div className="flex items-center gap-2 mb-5">
               <span
                 aria-label="4.9 out of 5 stars"
@@ -133,17 +123,14 @@ export default async function ProductDetailPage({ params }: Props) {
               </span>
             </div>
 
-            {/* Price */}
             <p className="text-2xl font-medium text-luma-ink mb-5 tracking-[-0.01em]">
               ${product.price}.00
             </p>
 
-            {/* Short description */}
             <p className="text-base text-luma-secondary leading-relaxed mb-6">
               {product.description}
             </p>
 
-            {/* Skin type tags */}
             {product.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-8">
                 {product.tags.slice(0, 3).map((tag) => (
@@ -157,10 +144,8 @@ export default async function ProductDetailPage({ params }: Props) {
               </div>
             )}
 
-            {/* Quantity + Add to Bag */}
             <AddToBagSection productId={product.id} productName={product.name} />
 
-            {/* GlowGuide nudge */}
             <div className="rounded-lg bg-luma-blush-pale border border-luma-blush p-4 pl-5 flex items-start gap-3.5">
               <span className="text-xl shrink-0" aria-hidden="true">✦</span>
               <div>
@@ -184,11 +169,9 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Product tabs */}
         <ProductTabs />
       </section>
 
-      {/* Related products */}
       {related.length > 0 && (
         <section className="border-t border-luma-border">
           <div className="container py-12 pb-16">

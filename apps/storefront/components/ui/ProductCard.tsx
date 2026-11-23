@@ -26,7 +26,6 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
         href={`/products/${id}`}
         className="group flex flex-col h-full bg-luma-surface rounded-md border border-luma-border overflow-hidden transition-all duration-[240ms] hover:shadow-md hover:-translate-y-0.5"
       >
-        {/* Image area — gradient is a dynamic per-product value, inline style required */}
         <div
           className={cn(
             'flex items-center justify-center overflow-hidden shrink-0',
@@ -45,7 +44,6 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
           </span>
         </div>
 
-        {/* Body — flex-col + flex-1 so price row always pins to bottom */}
         <div className={cn('flex flex-col flex-1', compact ? 'p-3.5' : 'p-5')}>
           <p className="text-[0.6875rem] tracking-[0.14em] uppercase text-luma-ghost mb-2">
             {category.replace('-', ' ')}
@@ -79,13 +77,11 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
             </div>
           )}
 
-          {/* Push price/button to bottom */}
           <div className="flex items-center justify-between pt-4 mt-auto border-t border-luma-border">
             <span className="text-[1.0625rem] font-medium text-luma-ink">
               ${price}
             </span>
 
-            {/* Add to bag — wired in Feature 2 */}
             <button
               aria-label={`Add ${name} to bag`}
               onClick={handleQuickAdd}

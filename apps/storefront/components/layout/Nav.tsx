@@ -21,11 +21,10 @@ export default function Nav() {
   return (
     <header className="sticky top-0 z-[200] bg-[rgba(247,240,234,0.92)] backdrop-blur-md border-b border-luma-border h-[68px]">
       <div className="container flex items-center h-[68px] gap-6">
-        {/* Logo */}
         <Link
           href="/"
           className="font-sans text-[1.0625rem] font-light tracking-[0.14em] uppercase text-luma-ink shrink-0"
-          aria-label="Luma Beauty — home"
+          aria-label="Luma Beauty - home"
         >
           <span className="font-display font-normal italic normal-case text-[1.25em] tracking-normal">
             Luma
@@ -33,7 +32,6 @@ export default function Nav() {
           Beauty
         </Link>
 
-        {/* Desktop nav links */}
         <nav
           aria-label="Main navigation"
           className="hidden md:flex items-center gap-8 ml-8"
@@ -49,9 +47,7 @@ export default function Nav() {
           ))}
         </nav>
 
-        {/* Actions */}
         <div className="ml-auto flex items-center gap-1">
-          {/* GlowGuide launcher — wired in Feature 3 */}
           <button
             data-open-widget
             aria-label="Open GlowGuide skin analysis"
@@ -60,10 +56,9 @@ export default function Nav() {
             <span aria-hidden="true">✦</span> Analyse
           </button>
 
-          {/* Cart — wired in Feature 2 */}
           <button
             onClick={openCart}
-            aria-label={itemCount > 0 ? `Open cart — ${itemCount} item${itemCount === 1 ? '' : 's'}` : 'Open cart — empty'}
+            aria-label={itemCount > 0 ? `Open cart - ${itemCount} item${itemCount === 1 ? '' : 's'}` : 'Open cart - empty'}
             className="flex items-center justify-center w-10 h-10 rounded-md text-luma-secondary hover:text-luma-ink hover:bg-luma-subtle transition-colors relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luma-accent focus-visible:ring-offset-2"
           >
             <svg
@@ -93,7 +88,6 @@ export default function Nav() {
             )}
           </button>
 
-          {/* Mobile hamburger */}
           <button
             onClick={toggle}
             aria-label={isOpen ? 'Close menu' : 'Open menu'}
@@ -130,7 +124,6 @@ export default function Nav() {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isOpen && (
         <nav
           id="mobile-menu"

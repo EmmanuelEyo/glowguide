@@ -20,7 +20,7 @@ export default function HomePage() {
             {/* Copy */}
             <div>
               <p className="font-sans text-[0.6875rem] font-medium tracking-[0.14em] uppercase text-luma-ghost mb-4">
-                Luma Beauty — Powered by GlowGuide
+                Luma Beauty - Powered by GlowGuide
               </p>
 
               <h1 className="font-display text-[clamp(3rem,6vw,5.5rem)] font-light leading-[1.1] tracking-[-0.025em] text-luma-ink mb-6">

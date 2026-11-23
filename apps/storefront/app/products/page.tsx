@@ -3,7 +3,7 @@ import { PRODUCTS } from '@/lib/products';
 import ProductGrid from './components/ProductGrid';
 
 export const metadata: Metadata = {
-  title: 'All Products — Luma Beauty',
+  title: 'All Products - Luma Beauty',
   description: 'Explore our curated range of serums, moisturisers, toners, SPF, cleansers, eye care, and masks.',
 };
 

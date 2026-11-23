@@ -24,7 +24,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Luma Beauty — Beauty That Knows Your Skin',
+  title: 'Luma Beauty - Beauty That Knows Your Skin',
   description:
     'Discover skincare personalised for you. Explore our curated range of serums, moisturisers, and treatments, guided by GlowGuide skin analysis.',
 };

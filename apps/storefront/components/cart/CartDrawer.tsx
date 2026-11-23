@@ -10,7 +10,6 @@ export default function CartDrawer() {
 
   return (
     <>
-      {/* Backdrop */}
       <div
         aria-hidden="true"
         onClick={closeCart}
@@ -20,7 +19,6 @@ export default function CartDrawer() {
         )}
       />
 
-      {/* Drawer panel */}
       <aside
         role="dialog"
         aria-modal="true"
@@ -30,7 +28,6 @@ export default function CartDrawer() {
           isOpen ? 'translate-x-0' : 'translate-x-full',
         )}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-luma-border">
           <h2 className="font-display text-[1.25rem] font-light text-luma-ink tracking-[-0.01em]">
             Your Bag
@@ -51,10 +48,8 @@ export default function CartDrawer() {
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto">
           {items.length === 0 ? (
-            /* Empty state */
             <div className="flex flex-col items-center justify-center h-full gap-5 px-8 text-center">
               <span className="text-[56px]" aria-hidden="true">🛍️</span>
               <div>
@@ -74,7 +69,6 @@ export default function CartDrawer() {
               </Link>
             </div>
           ) : (
-            /* Item list */
             <ul className="divide-y divide-luma-border">
               {items.map((item) => {
                 const product = PRODUCTS.find((p) => p.id === item.productId);
@@ -83,7 +77,6 @@ export default function CartDrawer() {
 
                 return (
                   <li key={item.productId} className="flex gap-4 px-6 py-5">
-                    {/* Gradient swatch — dynamic per-product, inline style required */}
                     <div
                       className="w-16 h-16 rounded-lg flex items-center justify-center text-2xl shrink-0 overflow-hidden"
                       style={{ background: product.gradient }}
@@ -92,7 +85,6 @@ export default function CartDrawer() {
                       {product.emoji}
                     </div>
 
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <p className="text-[0.625rem] tracking-[0.1em] uppercase text-luma-ghost mb-0.5">
                         {product.category.replace('-', ' ')}
@@ -101,7 +93,6 @@ export default function CartDrawer() {
                         {product.name}
                       </p>
 
-                      {/* Qty controls */}
                       <div className="flex items-center justify-between">
                         <div className="inline-flex items-center border border-luma-border rounded-[4px] overflow-hidden h-8">
                           <button
@@ -159,7 +150,6 @@ export default function CartDrawer() {
           )}
         </div>
 
-        {/* Footer — only shown when cart has items */}
         {items.length > 0 && (
           <div className="border-t border-luma-border px-6 py-5 space-y-4">
             <div className="flex items-center justify-between">
@@ -175,7 +165,7 @@ export default function CartDrawer() {
               aria-disabled="true"
               className="w-full h-12 rounded-[3px] bg-luma-accent/50 text-luma-inverse text-[0.6875rem] font-semibold tracking-[0.1em] uppercase cursor-not-allowed"
             >
-              Checkout — coming soon
+              Checkout - coming soon
             </button>
           </div>
         )}

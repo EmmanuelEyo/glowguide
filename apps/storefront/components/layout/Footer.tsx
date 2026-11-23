@@ -32,12 +32,11 @@ export default async function Footer() {
     <footer className="bg-luma-canvas text-[rgba(253,250,247,0.6)] mt-32">
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-16 py-16">
-          {/* Brand */}
           <div>
             <Link
               href="/"
               className="font-sans text-[1.0625rem] font-light tracking-[0.14em] uppercase text-[rgba(253,250,247,0.9)]"
-              aria-label="Luma Beauty — home"
+              aria-label="Luma Beauty - home"
             >
               <span className="font-display font-normal italic normal-case text-[1.25em] tracking-normal">
                 Luma
@@ -49,7 +48,6 @@ export default async function Footer() {
             </p>
           </div>
 
-          {/* Links grid */}
           <nav
             aria-label="Footer navigation"
             className="grid grid-cols-2 md:grid-cols-3 gap-8"
@@ -74,11 +72,10 @@ export default async function Footer() {
         </div>
       </div>
 
-      {/* Bottom bar */}
       <div className="border-t border-[rgba(253,250,247,0.12)]">
         <div className="container flex flex-wrap justify-between items-center py-5 gap-4">
           <p className="text-[0.6875rem]">
-            &copy; {year} Luma Beauty. All rights reserved. Portfolio demonstration — no real products or transactions.
+            &copy; {year} Luma Beauty. All rights reserved.
           </p>
           <p className="text-[0.6875rem]">
             Powered by{' '}
